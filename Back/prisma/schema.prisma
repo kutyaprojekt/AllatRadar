@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id             Int      @id @default(autoincrement())
+  email          String   @unique
+  username       String
+  password       String
+  phonenumber    String
+  admin          String   @default("false")
+  profilePicture String?
+  animals        Animal[] @relation("UserAnimals")
+
+  @@map("users")
+}
+
+model Animal {
+  id               Int     @id @default(autoincrement())
+  talalt_elveszett String //talalt vagy elveszett
+  allatfaj         String 
+  kategoria        String? // Opcionális mező
+  datum            String  // Feltöltés dátuma
+  elveszesIdeje    String? // Eltűnés/megtalálás dátuma
+  neme             String  @default("Ismeretlen")
+  szin             String
+  meret            String
+  egyeb_info       String? // Opcionális mező
+  helyszin         String
+  filePath         String
+  visszakerult_e   String
+  chipszam         BigInt?
+  elutasitva       String  @default("")
+  elutasitasoka    String  @default("")
+  visszajelzes     String  @default("")
+
+  userId Int
+  user   User @relation("UserAnimals", fields: [userId], references: [id])
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+  senderId  Int
+  receiverId Int
+
+  @@map("messages")
+}
