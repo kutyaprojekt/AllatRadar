@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Görgetősáv eltüntetése */
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+body {
+  -ms-overflow-style: none;  /* IE és Edge */
+  scrollbar-width: none;  /* Firefox */
+  overflow: auto; /* Tartalom görgethető marad */
+}
