@@ -7,17 +7,17 @@ const { protect } = require('../mwares/authMiddleware');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Multer konfiguráció
+// Multer tárhely konfiguráció
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
         const dir = './images';
         if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir); // Hozza létre a mappát, ha nem létezik
+            fs.mkdirSync(dir);
         }
-        cb(null, dir); // A feltöltött fájlok mentési helye
+        cb(null, dir);
     },
     filename: function (req, file, cb) {
-        cb(null, `${Date.now()}_${file.originalname}`); // Fájlnév konfiguráció
+        cb(null, `${Date.now()}_${file.originalname}`);
     },
 });
 
@@ -31,11 +31,9 @@ router.post('/upload-profile-picture', protect, upload.single('file'), async (re
         }
 
         const userId = req.user.id;
-        const filePath = `images/${req.file.filename}`; // Relatív elérési út
+        const filePath = `images/${req.file.filename}`;
 
-        console.log('Feltöltött fájl:', req.file); // Ellenőrizd a konzolon
-
-        // Mentés az adatbázisba
+        // Profilkép elérési út mentése adatbázisba
         await prisma.user.update({
             where: { id: userId },
             data: { profilePicture: filePath },
@@ -43,10 +41,9 @@ router.post('/upload-profile-picture', protect, upload.single('file'), async (re
 
         res.json({
             message: 'Profilkép sikeresen frissítve!',
-            filePath: filePath, // Relatív elérési út
+            filePath: filePath,
         });
     } catch (error) {
-        console.error('Hiba történt a profilkép feltöltése során:', error);
         res.status(500).json({ error: 'Hiba történt a profilkép feltöltése során' });
     }
 });
@@ -56,7 +53,7 @@ router.delete('/delete-profile-picture', protect, async (req, res) => {
     try {
         const userId = req.user.id;
 
-        // Ellenőrizzük, hogy a felhasználónak van-e profilképje
+        // Felhasználó profilkép ellenőrzése
         const user = await prisma.user.findUnique({
             where: { id: userId },
         });
@@ -65,10 +62,10 @@ router.delete('/delete-profile-picture', protect, async (req, res) => {
             return res.status(404).json({ error: 'Nincs profilkép a törléshez!' });
         }
 
-        // Töröljük a fájlt a szerverről
+        // Fájl törlése a szerverről
         fs.unlinkSync(user.profilePicture);
 
-        // Frissítsük a felhasználó profilképét az adatbázisban
+        // Profilkép referencia törlése az adatbázisból
         await prisma.user.update({
             where: { id: userId },
             data: { profilePicture: null },
@@ -78,7 +75,6 @@ router.delete('/delete-profile-picture', protect, async (req, res) => {
             message: 'Profilkép sikeresen törölve!',
         });
     } catch (error) {
-        console.error('Hiba történt a profilkép törlése során:', error);
         res.status(500).json({ error: 'Hiba történt a profilkép törlése során' });
     }
 });

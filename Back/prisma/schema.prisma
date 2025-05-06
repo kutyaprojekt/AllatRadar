@@ -7,6 +7,7 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+// Felhasználó modell
 model User {
   id             Int      @id @default(autoincrement())
   email          String   @unique
@@ -20,17 +21,18 @@ model User {
   @@map("users")
 }
 
+// Állat hirdetés modell
 model Animal {
   id               Int     @id @default(autoincrement())
-  talalt_elveszett String //talalt vagy elveszett
+  talalt_elveszett String  // Állat státusza (talált vagy elveszett)
   allatfaj         String 
-  kategoria        String? // Opcionális mező
+  kategoria        String? // Állat kategóriája
   datum            String  // Feltöltés dátuma
   elveszesIdeje    String? // Eltűnés/megtalálás dátuma
   neme             String  @default("Ismeretlen")
   szin             String
   meret            String
-  egyeb_info       String? // Opcionális mező
+  egyeb_info       String? // Egyéb információ
   helyszin         String
   filePath         String
   visszakerult_e   String
@@ -43,6 +45,7 @@ model Animal {
   user   User @relation("UserAnimals", fields: [userId], references: [id])
 }
 
+// Üzenet modell
 model Message {
   id        Int      @id @default(autoincrement())
   content   String
