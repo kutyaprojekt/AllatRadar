@@ -196,7 +196,7 @@ const MyPosts = () => {
     };
 
     return (
-        <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#F0F4F8]'}`}>
+        <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
             <div className="container mx-auto px-4 pt-24 pb-12">
                 <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-4 md:p-8`}>
                     <div className="flex items-center justify-between mb-6 md:mb-10">

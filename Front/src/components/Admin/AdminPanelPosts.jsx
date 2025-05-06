@@ -209,7 +209,7 @@ const AdminPanelPosts = () => {
     }, [filter]);
 
     return (
-        <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#F0F4F8]'}`}>
+        <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
             <div className="container mx-auto px-4 pt-24 pb-12 flex flex-col md:flex-row gap-8">
                 {/* Oldalsó menü */}
                 <SideBarMenu 
@@ -264,8 +264,8 @@ const AdminPanelPosts = () => {
                     </div>
 
                     {isMobile ? (
-                        /* Kártya nézet mobilon */
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        /* Kártya nézet mobilon - az első osztályt módosítjuk */
+                        <div className="grid grid-cols-1 gap-6">
                             {filteredAnimals.length === 0 ? (
                                 <div className={`col-span-full py-12 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
                                     Nincs megjeleníthető poszt
@@ -278,8 +278,8 @@ const AdminPanelPosts = () => {
                                             theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
                                         }`}
                                     >
-                                        {/* Állat kép */}
-                                        <div className="h-36 w-full relative">
+                                        {/* Állat kép - magasságot növeljük */}
+                                        <div className="h-40 w-full relative">
                                             {animal.filePath ? (
                                                 <img 
                                                     src={`http://localhost:8000/${animal.filePath}`}
@@ -313,67 +313,67 @@ const AdminPanelPosts = () => {
                                             </div>
                                         </div>
                                         
-                                        {/* Tartalom */}
-                                        <div className="p-4">
-                                            <h3 className={`font-bold text-lg mb-1 ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
+                                        {/* Tartalom - több paddingot adunk */}
+                                        <div className="p-5">
+                                            <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
                                                 {animal.allatfaj}
                                             </h3>
-                                            <p className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                            <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                                 Kategória: {animal.kategoria || '-'}
                                             </p>
-                                            <p className={`text-sm mb-1 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+                                            <p className={`text-sm mb-2 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                                 Beküldő: {animal.user?.username || '-'}
                                             </p>
                                         </div>
                                         
-                                        {/* Műveletek */}
+                                        {/* Műveletek - gombokat nagyobbá tesszük */}
                                         <div className={`flex divide-x border-t ${
                                             theme === 'dark' ? 'border-gray-700 divide-gray-700' : 'border-gray-200 divide-gray-200'
                                         }`}>
                                             <button
                                                 onClick={() => openModal(animal)}
-                                                className={`flex-1 py-2 flex items-center justify-center ${
+                                                className={`flex-1 py-3 flex items-center justify-center ${
                                                     theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'
                                                 }`}
+                                                title="Részletek"
                                             >
-                                                <FaInfoCircle className="mr-1" /> 
-                                                <span className="text-xs">Részletek</span>
+                                                <FaInfoCircle />
                                             </button>
                                             
-                                            {animal.elutasitva === "" && (
+                                            {animal.elutasitva === "" ? (
                                                 <>
                                                     <button
                                                         onClick={() => handleApproveAnimal(animal.id)}
-                                                        className={`flex-1 py-2 flex items-center justify-center ${
+                                                        className={`flex-1 py-3 flex items-center justify-center ${
                                                             theme === 'dark' ? 'text-green-400 hover:bg-gray-700' : 'text-green-600 hover:bg-gray-50'
                                                         }`}
+                                                        title="Jóváhagy"
                                                     >
-                                                        <FaCheck className="mr-1" />
-                                                        <span className="text-xs">Jóváhagy</span>
+                                                        <FaCheck />
                                                     </button>
                                                     <button
                                                         onClick={() => {
                                                             setSelectedPostId(animal.id);
                                                             setShowRejectionModal(true);
                                                         }}
-                                                        className={`flex-1 py-2 flex items-center justify-center ${
+                                                        className={`flex-1 py-3 flex items-center justify-center ${
                                                             theme === 'dark' ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-gray-50'
                                                         }`}
+                                                        title="Elutasít"
                                                     >
-                                                        <FaTimes className="mr-1" />
-                                                        <span className="text-xs">Elutasít</span>
+                                                        <FaTimes />
                                                     </button>
                                                 </>
-                                            )}
+                                            ) : null}
                                             
                                             <button
                                                 onClick={() => openDeleteModal(animal)}
-                                                className={`flex-1 py-2 flex items-center justify-center ${
+                                                className={`flex-1 py-3 flex items-center justify-center ${
                                                     theme === 'dark' ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-gray-50'
                                                 }`}
+                                                title="Törlés"
                                             >
-                                                <FaTrash className="mr-1" />
-                                                <span className="text-xs">Törlés</span>
+                                                <FaTrash />
                                             </button>
                                         </div>
                                     </div>
@@ -381,7 +381,7 @@ const AdminPanelPosts = () => {
                             )}
                         </div>
                     ) : (
-                        /* Táblázat nézet asztali eszközökön */
+                        /* Táblázat nézet asztali eszközökön - változatlan */
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} text-left`}>

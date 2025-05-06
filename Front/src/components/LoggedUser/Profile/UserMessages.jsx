@@ -283,7 +283,7 @@ const UserMessages = () => {
   }, []);
 
   return (
-    <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-[#F0F4F8]"}`}>
+    <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]"}`}>
       <div className="container mx-auto px-4 pt-24 pb-12 flex flex-col md:flex-row gap-8">
         {/* SideBarMenu komponens */}
         <SideBarMenu 

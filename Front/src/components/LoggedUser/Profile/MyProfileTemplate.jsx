@@ -3,7 +3,7 @@ import { FaEye, FaEyeSlash, FaUser, FaEnvelope, FaLock, FaCamera, FaTrash, FaSav
 import UserContext from '../../../context/UserContext';
 import { useTheme } from "../../../context/ThemeContext";
 import SideBarMenu from '../../Assets/SidebarMenu/SideBarMenu';
-import { ToastContainer, toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -40,6 +40,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
     const [activeTab, setActiveTab] = useState('profilom');
     const [isAdmin] = useState(user.admin === "true");
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    const [previewImage, setPreviewImage] = useState(null);
 
     const defaultProfilePicture = '/default-profile.jpg';
 
@@ -49,8 +50,14 @@ const MyProfileTemplate = ({ user, onLogout }) => {
         };
         
         window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+            // Cleanup preview URL when component unmounts
+            if (previewImage) {
+                URL.revokeObjectURL(previewImage);
+            }
+        };
+    }, [previewImage]);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -59,20 +66,36 @@ const MyProfileTemplate = ({ user, onLogout }) => {
     const handleProfilePictureUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) {
-            alert('Kérjük, válasszon ki egy fájlt!');
+            toast.error('Kérjük, válasszon ki egy fájlt!');
             return;
         }
 
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            setUploadedFile(file);
-        };
-        reader.readAsDataURL(file);
+        // Ellenőrizzük a fájl méretét (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            toast.error('A kép mérete nem lehet nagyobb 5MB-nál!');
+            return;
+        }
+
+        // Ellenőrizzük a fájl típusát
+        if (!file.type.startsWith('image/')) {
+            toast.error('Csak képfájlok tölthetők fel!');
+            return;
+        }
+
+        // Előző preview törlése
+        if (previewImage) {
+            URL.revokeObjectURL(previewImage);
+        }
+
+        // Új preview létrehozása
+        const previewUrl = URL.createObjectURL(file);
+        setPreviewImage(previewUrl);
+        setUploadedFile(file);
     };
 
     const handleDeleteProfilePicture = async () => {
         try {
-            const response = await fetch('http://localhost:8000/api/delete-profile-picture', {
+            const response = await fetch('http://localhost:8000/profile-picture/delete-profile-picture', {
                 method: 'DELETE',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -118,7 +141,6 @@ const MyProfileTemplate = ({ user, onLogout }) => {
             }
 
             const data = await response.json();
-            console.log('Jelszó frissítve:', data);
             setIsEditingPassword(false);
             setOldPassword('');
             setNewPassword('');
@@ -140,7 +162,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                 const formData = new FormData();
                 formData.append('file', uploadedFile);
 
-                const uploadResponse = await fetch('http://localhost:8000/api/upload-profile-picture', {
+                const uploadResponse = await fetch('http://localhost:8000/profile-picture/upload-profile-picture', {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -149,13 +171,21 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                 });
 
                 if (!uploadResponse.ok) {
-                    throw new Error('Kép feltöltése sikertelen');
+                    const errorData = await uploadResponse.json().catch(() => ({ error: 'Kép feltöltése sikertelen' }));
+                    throw new Error(errorData.error || 'Kép feltöltése sikertelen');
                 }
 
                 const uploadData = await uploadResponse.json();
                 setProfilePicture(uploadData.filePath);
+                // Preview törlése sikeres feltöltés után
+                if (previewImage) {
+                    URL.revokeObjectURL(previewImage);
+                    setPreviewImage(null);
+                }
                 changes.push('profilkép');
-                toast.success('Profilkép frissítve');
+                
+                toast.success('Profilkép sikeresen frissítve!');
+                SetRefresh((prev) => !prev);
             }
 
             // Ellenőrizzük, hogy változott-e valamelyik adat
@@ -163,27 +193,25 @@ const MyProfileTemplate = ({ user, onLogout }) => {
             const nameChanged = newName !== name;
 
             if (emailChanged || nameChanged) {
-            const response = await fetch(`http://localhost:8000/felhasznalok/${userId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: newEmail, username: newName }),
-            });
+                const response = await fetch(`http://localhost:8000/felhasznalok/${userId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: newEmail, username: newName }),
+                });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                // Check if it's the unique email constraint error
-                if (errorData.error && errorData.error.includes("Ez az email cím már használatban van")) {
-                    throw new Error("Ez az e-mail cím már használatban van.");
-                } else {
-                    throw new Error(errorData.error || 'Profil frissítése sikertelen');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    if (errorData.error && errorData.error.includes("Ez az email cím már használatban van")) {
+                        throw new Error("Ez az e-mail cím már használatban van.");
+                    } else {
+                        throw new Error(errorData.error || 'Profil frissítése sikertelen');
+                    }
                 }
-            }
 
-            const data = await response.json();
-            console.log('Profil frissítve:', data);
+                const data = await response.json();
                 
                 if (nameChanged) {
                     changes.push('felhasználónév');
@@ -195,16 +223,14 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                     toast.success('Email cím frissítve');
                 }
 
-            setIsEditingEmail(false);
-            setIsEditingName(false);
-            setEmail(newEmail);
-            setName(newName);
+                setIsEditingEmail(false);
+                setIsEditingName(false);
+                setEmail(newEmail);
+                setName(newName);
             }
 
             setUploadedFile(null);
-            SetRefresh((prev) => !prev);
             
-            // Ha nem történt változás, akkor tájékoztatjuk a felhasználót
             if (changes.length === 0) {
                 toast.info('Nem történt változás');
             }
@@ -214,10 +240,10 @@ const MyProfileTemplate = ({ user, onLogout }) => {
         }
     };
 
-    // Profilkép URL-je
-    const profilePictureUrl = user.profilePicture 
+    // Profilkép URL-je - módosítjuk, hogy a preview-t is figyelembe vegye
+    const profilePictureUrl = previewImage || (user.profilePicture 
         ? `http://localhost:8000/${user.profilePicture.replace(/\\/g, '/')}?${Date.now()}`
-        : defaultProfilePicture;
+        : defaultProfilePicture);
         
     // Kijelentkezés kezelése
     const handleLogout = () => {
@@ -229,19 +255,25 @@ const MyProfileTemplate = ({ user, onLogout }) => {
             localStorage.removeItem("usertoken");
             localStorage.removeItem("user");
             SetRefresh((prev) => !prev);
-            toast.success("Sikeresen kijelentkeztél!");
             
-            // Rövid késleltetés után navigálás és oldal frissítése
-            setTimeout(() => {
-                navigate("/home");
-                // Explicit oldal frissítés a biztos újratöltéshez
-                window.location.reload();
-            }, 1000);
+            // Toast üzenet megjelenítése és akkor navigálunk amikor ténylegesen bezárul
+            toast.success("Sikeresen kijelentkeztél!", {
+                position: "top-right",
+                autoClose: 1500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true,
+                onClose: () => {
+                    navigate("/home");
+                    window.location.reload();
+                }
+            });
         }
     };
 
     return (
-        <div className={`min-h-screen pt-16 ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#F0F4F8]'}`}>
+        <div className={`min-h-screen pt-16 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
             <div className="container mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row gap-6">
                     {/* Oldalsáv menü - a SideBarMenu komponens mobile-sensitive most */}
@@ -469,12 +501,6 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                 {/* Kijelentkezés doboz - az oldal alján könnyű elérhetőséggel */}
                                 <div className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'} p-6 rounded-lg shadow-sm md:col-span-2 mt-6`}>
                                     <div className="flex flex-col items-center justify-center">
-                                        <h3 className={`font-semibold mb-4 text-center ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                            </svg>
-                                            Kijelentkezés a fiókból
-                                        </h3>
                                         <button
                                             onClick={handleLogout}
                                             className={`px-6 py-3 w-full sm:w-64 rounded-lg shadow-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 flex items-center justify-center 
@@ -492,7 +518,19 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                     </div>
                 </div>
             </div>
-            <ToastContainer />
+            
+            <ToastContainer 
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                style={{ zIndex: 9999 }}
+            />
         </div>
     );
 };

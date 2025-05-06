@@ -289,13 +289,13 @@ const Navbar = () => {
                 <div className="hidden lg:flex space-x-2">
                   <Link
                     to="/login"
-                    className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-blue-500 text-white"} px-4 py-2 rounded-lg font-medium transition duration-300 hover:opacity-90`}
+                    className={`${theme === "dark" ? "bg-gray-700 text-white hover:bg-gray-600" : "bg-[#0c4a6e] text-white hover:bg-[#083344]"} px-4 py-2 rounded-lg font-medium transition duration-300`}
                   >
                     Bejelentkezés
                   </Link>
                   <Link
                     to="/regisztracio"
-                    className={`${theme === "dark" ? "border border-gray-500 text-white" : "border border-blue-500 text-blue-500"} px-4 py-2 rounded-lg font-medium transition duration-300 hover:opacity-90`}
+                    className={`${theme === "dark" ? "border border-gray-500 text-gray-400 hover:text-white" : "border border-[#0c4a6e] text-[#0c4a6e]"} px-4 py-2 rounded-lg font-medium transition duration-300 hover:opacity-90`}
                   >
                     Regisztráció
                   </Link>
@@ -334,10 +334,10 @@ const Navbar = () => {
             {!isLoggedIn && (
               <div className="pt-4 mt-4 border-t border-gray-300 dark:border-gray-600">
                 <div className="flex flex-col space-y-2">
-                  <Link to="/regisztracio" className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-[#0c4a6e] text-white"} px-4 py-3 rounded-lg font-medium text-lg hover:opacity-90 transition duration-300`} onClick={handleLinkClick}>
+                  <Link to="/regisztracio" className={`${theme === "dark" ? "bg-transparent border border-gray-500 text-gray-400" : "bg-transparent border border-[#0c4a6e] text-[#0c4a6e]"} px-4 py-3 rounded-lg font-medium text-lg hover:opacity-90 transition duration-300`} onClick={handleLinkClick}>
                     Regisztráció
                   </Link>
-                  <Link to="/login" className={`${theme === "dark" ? "bg-blue-600 text-white" : "bg-[#0c4a6e] text-white"} px-4 py-3 rounded-lg font-medium text-lg hover:opacity-90 transition duration-300`} onClick={handleLinkClick}>
+                  <Link to="/login" className={`${theme === "dark" ? "bg-gray-700 text-white hover:bg-gray-600" : "bg-[#0c4a6e] text-white hover:bg-[#083344]"} px-4 py-3 rounded-lg font-medium text-lg hover:opacity-90 transition duration-300`} onClick={handleLinkClick}>
                     Bejelentkezés
                   </Link>
                 </div>

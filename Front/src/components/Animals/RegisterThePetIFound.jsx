@@ -96,11 +96,6 @@ const RegisterThePetIFound = () => {
     const file = e.target.files[0];
     if (file) {
       setFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -116,6 +111,7 @@ const RegisterThePetIFound = () => {
       return;
     }
 
+    const formData = new FormData();
     for (const key in formState) {
       formData.append(key, formState[key]);
     }
@@ -134,9 +130,18 @@ const RegisterThePetIFound = () => {
       const data = await response.json();
 
       if (data.message === "Sikeres adatfelvitel!") {
-        toast.success("Sikeres adatfelvitel!");
         SetRefresh((prev) => !prev);
-        navigate("/animals");
+        
+        // Egyetlen toast üzenet jóváhagyásról
+        toast.success("Bejegyzése jóváhagyásra vár", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          onClose: () => navigate("/home") // Toast bezárása után navigálás
+        });
       } else {
         toast.error(data.error);
       }
@@ -312,11 +317,6 @@ const RegisterThePetIFound = () => {
             required
           />
         </div>
-        {preview && (
-          <div className="mt-4">
-            <img src={preview} alt="Preview" className="w-full max-w-xs mx-auto rounded-lg" />
-          </div>
-        )}
       </div>
     </div>
   );
@@ -569,10 +569,8 @@ const RegisterThePetIFound = () => {
 
             {/* Kép feltöltése */}
             <div className="col-span-2">
-              <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
-                Kép feltöltése <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
+              <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Kép feltöltése <span className="text-red-500">*</span></label>
+              <div className="relative w-full">
                 <FaImage className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "text-gray-400" : "text-[#0c4a6e]"} text-lg`} />
                 <input
                   type="file"
@@ -582,11 +580,6 @@ const RegisterThePetIFound = () => {
                   required
                 />
               </div>
-              {preview && (
-                <div className="mt-4">
-                  <img src={preview} alt="Preview" className="max-w-xs mx-auto rounded-lg" />
-                </div>
-              )}
             </div>
           </div>
 
@@ -601,31 +594,42 @@ const RegisterThePetIFound = () => {
 
       {/* Jobb oldali inspiráló szöveg */}
       <div className="hidden xl:flex flex-col justify-center items-center ml-8 w-1/3">
-        <div className={`mt-6 text-center p-8 rounded-3xl shadow-xl border-2 ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white bg-opacity-90 border-[#0c4a6e]"}`}>
-          <h2 className={`text-3xl font-bold ${theme === "dark" ? "text-white" : "text-[#0c4a6e]"} mb-6`}>
-            Találtál egy kisállatot? Segíts hazajutni!
-          </h2>
-          <div className="mb-6">
-            <img src="/images/found-pet.svg" alt="Talált kisállat" className="mx-auto h-48 mb-4" 
-                onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
+        <div className={`mt-6 text-center p-8 rounded-3xl shadow-xl border-2 ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white bg-opacity-90 border-[#0c4a6e]"} flex flex-col justify-between`} style={{ minHeight: "600px" }}>
+          <div>
+            <h2 className={`text-3xl font-bold ${theme === "dark" ? "text-white" : "text-[#0c4a6e]"} mb-4`}>
+              Találtál egy kisállatot? Segíts hazajutni!
+            </h2>
+            <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-[#074F57]"} mb-5 leading-relaxed`}>
+              A talált kisállat és gazdája összehozásában kulcsfontosságú, hogy <span className={`font-semibold ${theme === "dark" ? "text-white" : ""}`}>minél részletesebb információkat</span> adj meg róla. Ezzel segíted, hogy a gazdi felismerhesse elveszett kedvencét!
+            </p>
           </div>
-          <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-[#074F57]"} mb-6 leading-relaxed`}>
-            A talált kisállat és gazdája összehozásában kulcsfontosságú, hogy <span className={`font-semibold ${theme === "dark" ? "text-white" : ""}`}>minél részletesebb információkat</span> adj meg róla. Ezzel segíted, hogy a gazdi felismerhesse elveszett kedvencét!
-          </p>
-          <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-[#074F57]"} mb-6 leading-relaxed`}>
-            <span className={`text-xl font-semibold block mb-2 ${theme === "dark" ? "text-gray-200" : "text-[#0c4a6e]"}`}>Találtál egy kisállatot? Ezt tedd:</span>
-            <ul className="list-disc list-inside space-y-2 text-left">
+          
+          <div className="flex-grow">
+            <p className={`text-xl font-semibold mb-3 ${theme === "dark" ? "text-gray-200" : "text-[#0c4a6e]"}`}>Találtál egy kisállatot? Ezt tedd:</p>
+            <ul className={`list-disc list-inside space-y-2 text-left text-lg ${theme === "dark" ? "text-gray-300" : "text-[#074F57]"}`}>
               <li>Ellenőrizd, van-e a kisállaton nyakörv vagy bilétán elérhetőség</li>
               <li>Vidd el állatorvoshoz, hogy ellenőrizzék a microchipet</li>
               <li>Készíts jó minőségű fotókat több szögből</li>
               <li>Oszd meg a megtalálás helyszínén kihelyezett hirdetéseken</li>
               <li>Legyél türelmes és gondoskodó a megtalált állattal</li>
             </ul>
-          </p>
-          <div className={`mt-8 p-5 rounded-xl ${theme === "dark" ? "bg-gray-700" : "bg-[#e1f5fe]"}`}>
-            <p className={`font-medium text-lg ${theme === "dark" ? "text-white" : "text-[#0c4a6e]"}`}>
-              Egy jól kitöltött adatlap akár <span className="font-bold">24 órán belül</span> sikeres találkozást eredményezhet a gazdi és elveszett kedvence között!
-            </p>
+          </div>
+          
+          <div>
+            <div className="flex items-center justify-center my-4">
+              <img 
+                src="/images/found-pet.svg" 
+                alt="Talált kisállat" 
+                className="mx-auto h-24 max-w-full" 
+                onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} 
+              />
+            </div>
+            
+            <div className={`p-5 rounded-xl ${theme === "dark" ? "bg-gray-700" : "bg-[#e1f5fe]"}`}>
+              <p className={`font-medium text-lg ${theme === "dark" ? "text-white" : "text-[#0c4a6e]"}`}>
+                Egy jól kitöltött adatlap akár <span className="font-bold">24 órán belül</span> sikeres találkozást eredményezhet a gazdi és elveszett kedvence között!
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -635,7 +639,18 @@ const RegisterThePetIFound = () => {
   return (
     <>
       {isMobile ? renderMobileView() : renderDesktopView()}
-      <ToastContainer position="bottom-right" />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={theme === "dark" ? "dark" : "light"}
+      />
     </>
   );
 };

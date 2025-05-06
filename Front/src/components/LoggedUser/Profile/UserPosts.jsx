@@ -5,6 +5,8 @@ import SideBarMenu from '../../Assets/SidebarMenu/SideBarMenu';
 import { Link } from "react-router-dom";
 import { FaPlus } from 'react-icons/fa';
 import UserContext from '../../../context/UserContext';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const UserPosts = () => {
     const [animals, setAnimals] = useState([]);
@@ -34,7 +36,6 @@ const UserPosts = () => {
             });
             const userData = await userResponse.json();
             setUser(userData);
-            console.log(userData);
 
             if(userData.admin == "true") {
                 setIsAdmin(true);
@@ -81,7 +82,13 @@ const UserPosts = () => {
         fetchData();
     }, [refresh]);
 
-    const handlePostUpdate = () => {
+    const handlePostUpdate = async () => {
+        console.log("Frissítés kérve a UserPosts komponensben");
+        
+        // Közvetlenül töltjük újra az állatokat
+        await loadAnimals();
+        
+        // Majd frissítjük a kontextust is a teljes alkalmazás frissítéséhez
         SetRefresh(prev => !prev);
     };
 
@@ -99,14 +106,15 @@ const UserPosts = () => {
 
     if (loading) {
         return (
-            <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-gray-900" : "bg-[#F0F4F8]"}`}>
+            <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-gray-900" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]"}`}>
                 <div className="text-2xl font-semibold">Betöltés...</div>
             </div>
         );
     }
 
     return (
-        <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-[#F0F4F8]"}`}>
+        <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]"}`}>
+            <ToastContainer className="z-50" />
             <div className="container mx-auto px-4 pt-24 pb-12 flex flex-col md:flex-row gap-8">
                 {/* SideBarMenu komponens használata */}
                 <SideBarMenu 
@@ -165,7 +173,7 @@ const UserPosts = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
                             {filteredAnimals.map((animal) => (
                                 <div key={animal.id} className="h-full">
-                                    <UserPostsTemplate animal={animal} />
+                                    <UserPostsTemplate animal={animal} onUpdate={handlePostUpdate} />
                                 </div>
                             ))}
                         </div>

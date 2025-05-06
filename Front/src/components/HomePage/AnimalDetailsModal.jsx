@@ -12,6 +12,22 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
     const textSecondary = theme === "dark" ? "text-gray-400" : "text-gray-600";
     const borderColor = theme === "dark" ? "border-gray-700" : "border-gray-300";
 
+    // Format date function to convert ISO date to readable format
+    const formatDate = (dateString) => {
+        if (!dateString) return "Nincs dátum";
+        try {
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) return "Érvénytelen dátum";
+            return new Intl.DateTimeFormat('hu-HU', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            }).format(date);
+        } catch (error) {
+            return "Érvénytelen dátum";
+        }
+    };
+
     const handleAfterOpen = () => {
         document.body.style.overflow = 'hidden';
     };
@@ -86,22 +102,22 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className={`${cardBg} p-5 rounded-xl shadow-md flex items-center gap-3`}>
-                                    <FaCalendarAlt className="text-2xl text-blue-500" />
-                                    <p><strong>Dátum:</strong> {animal.datum}</p>
+                                    <FaCalendarAlt className="text-3xl text-blue-500" />
+                                    <p><strong>Dátum:</strong> {formatDate(animal.datum)}</p>
                                 </div>
 
                                 <div className={`${cardBg} p-5 rounded-xl shadow-md flex items-center gap-3`}>
-                                    <FaMapMarkerAlt className="text-2xl text-red-500" />
+                                    <FaMapMarkerAlt className="text-3xl text-red-500" />
                                     <p><strong>Helyszín:</strong> {animal.helyszin}</p>
                                 </div>
 
                                 <div className={`${cardBg} p-5 rounded-xl shadow-md flex items-center gap-3`}>
-                                    <FaVenusMars className="text-2xl text-pink-500" />
+                                    <FaVenusMars className="text-3xl text-pink-500" />
                                     <p><strong>Nem:</strong> {animal.neme}</p>
                                 </div>
 
                                 <div className={`${cardBg} p-5 rounded-xl shadow-md flex items-center gap-3`}>
-                                    <FaRuler className="text-2xl text-green-500" />
+                                    <FaRuler className="text-3xl text-green-500" />
                                     <p><strong>Méret:</strong> {animal.meret}</p>
                                 </div>
                             </div>
@@ -117,13 +133,13 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
                                 </h4>
                                 <div className="mt-2 space-y-1">
                                     <p className="flex items-center gap-2">
-                                        <FaUser className="text-blue-500" /> <strong>Név:</strong> {animal.user.username}
+                                        <FaUser className="text-2xl text-blue-500" /> <strong>Név:</strong> {animal.user.username}
                                     </p>
                                     <p className="flex items-center gap-2">
-                                        <FaEnvelope className="text-blue-500" /> <strong>Email:</strong> {animal.user.email}
+                                        <FaEnvelope className="text-2xl text-blue-500" /> <strong>Email:</strong> {animal.user.email}
                                     </p>
                                     <p className="flex items-center gap-2">
-                                        <FaPhone className="text-blue-500" /> <strong>Telefonszám:</strong> {animal.user.phonenumber}
+                                        <FaPhone className="text-2xl text-blue-500" /> <strong>Telefonszám:</strong> {animal.user.phonenumber}
                                     </p>
                                 </div>
                             </div>

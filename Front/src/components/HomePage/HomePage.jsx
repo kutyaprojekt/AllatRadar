@@ -22,13 +22,11 @@ const Home = () => {
   const openFullStory = (story) => {
     setSelectedStory(story);
     setShowFullStoryModal(true);
-    document.body.style.overflow = 'hidden';
   };
 
   // Modal bezárása
   const closeFullStory = () => {
     setShowFullStoryModal(false);
-    document.body.style.overflow = 'auto';
   };
 
   // Intersection Observer hookok
@@ -53,7 +51,14 @@ const Home = () => {
         }
 
         const data = await response.json();
-        setLostAnimals(data);
+        
+        // Állatok rendezése dátum szerint, a legújabbak legyenek elöl
+        const sortedAnimals = [...data].sort((a, b) => {
+          // Dátum szerinti rendezés (legújabbak elöl)
+          return new Date(b.datum) - new Date(a.datum);
+        });
+        
+        setLostAnimals(sortedAnimals);
       } catch (error) {
         console.error("Hiba történt az elveszett állatok lekérése során:", error);
       }
@@ -138,7 +143,7 @@ const Home = () => {
   };
 
   return (
-    <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-[#073F48]"} min-h-screen pt-16 md:pt-0 no-scroll`}>
+    <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-[#073F48]"} min-h-screen pt-16 md:pt-0`}>
       {/* Hero Section */}
       <div
         ref={heroRef}
@@ -150,12 +155,20 @@ const Home = () => {
             Az "Állatkereső és -megtaláló Rendszer" segít az elveszett háziállatok gyors és hatékony visszakerülésében.
           </p>
           <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
-            <button className={`${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-white hover:bg-gray-100 text-[#074F57]"} font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base`}>
-              <Link to={"/elveszettallat"}>Elveszett Kisállatom</Link>
-            </button>
-            <button className={`${theme === "dark" ? "bg-transparent border-2 border-gray-700 hover:bg-gray-700" : "bg-transparent border-2 border-white hover:bg-white hover:text-[#074F57]"} text-white font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base`}>
-              <Link to={"/talaltallat"}>Állatot találtam</Link>
-            </button>
+            <Link 
+              to={"/elveszettallat"} 
+              className={`${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-white hover:bg-gray-100 text-[#074F57]"} font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base inline-block text-center`}
+              style={{ width: "100%", maxWidth: "250px" }}
+            >
+              Elveszett Kisállatom
+            </Link>
+            <Link 
+              to={"/talaltallat"} 
+              className={`${theme === "dark" ? "bg-transparent border-2 border-gray-700 hover:bg-gray-700" : "bg-transparent border-2 border-white hover:bg-white hover:text-[#074F57]"} text-white font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base inline-block text-center`}
+              style={{ width: "100%", maxWidth: "250px" }}
+            >
+              Állatot találtam
+            </Link>
           </div>
         </div>
         {/* Háttérkép */}
@@ -283,11 +296,12 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <h2 className={`text-2xl md:text-4xl font-bold text-center ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-6 md:mb-12`}>Elveszett Állatok</h2>
           <p className={`text-center mb-10 max-w-3xl mx-auto ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-            Ezek az állatok még keresik szerető otthonukat
+            Ezek a legfrissebben feltöltött elveszett állatok
           </p>
           
           <div className="flex flex-wrap justify-center gap-6">
             {lostAnimals && lostAnimals.length > 0 ? (
+              // Csak a legutolsó 6 állat megjelenítése
               lostAnimals.slice(0, 6).map((animal) => (
                 <div
                   key={animal.id}

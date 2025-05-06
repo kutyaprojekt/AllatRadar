@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import UserContext from "../../context/UserContext";
 import { FaUser, FaLock, FaEnvelope, FaPhone } from "react-icons/fa";
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useTheme } from "../../context/ThemeContext";
 
@@ -68,22 +69,40 @@ const Register = () => {
       return;
     }
 
-    const response = await fetch("http://localhost:8000/felhasznalok/regisztracio", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(formState),
-    });
+    try {
+      const response = await fetch("http://localhost:8000/felhasznalok/regisztracio", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(formState),
+      });
 
-    const data = await response.json();
-    console.log(data);
-    if (data.message === "Sikeres regisztráció!") {
-      toast(data.message);
-      SetRefresh((prev) => !prev);
-      navigate("/login");
-    } else {
-      toast(data.error);
+      const data = await response.json();
+      
+      if (data.message === "Sikeres regisztráció!" || data.success) {
+        // Sikeres toast üzenet és időzített átirányítás
+        toast.success("Sikeres regisztráció!", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          onClose: () => navigate("/login")
+        });
+        SetRefresh((prev) => !prev);
+      } else {
+        toast.error(data.error, {
+          position: "top-right",
+          autoClose: 2500
+        });
+      }
+    } catch (error) {
+      toast.error("Hiba történt a regisztráció során. Kérjük próbálja újra.", {
+        position: "top-right",
+        autoClose: 2500
+      });
     }
   };
 
@@ -187,7 +206,17 @@ const Register = () => {
             >
               Regisztráció
             </button>
-            <ToastContainer />
+            <ToastContainer 
+              position="top-right"
+              autoClose={1500}
+              hideProgressBar={false}
+              newestOnTop={true}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+            />
           </div>
         </div>
       </div>

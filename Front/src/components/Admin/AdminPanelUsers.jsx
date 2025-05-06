@@ -89,7 +89,7 @@ const AdminPanelUsers = () => {
     );
 
     return (
-        <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#F0F4F8]'}`}>
+        <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
             <div className="container mx-auto px-4 pt-24 pb-12 flex flex-col md:flex-row gap-8">
                 {/* Oldalsó menü */}
                 <SideBarMenu 
@@ -202,7 +202,7 @@ const AdminPanelUsers = () => {
                                         <td className="py-4 px-4">
                                             <div className="flex justify-end space-x-2">
                                                 <button
-                                                    onClick={() => document.getElementById(`user-modal-${user.id}`).showModal()}
+                                                    onClick={() => handleOpenModal(`user-modal-${user.id}`)}
                                                     className={`p-2 rounded-lg transition-colors ${
                                                         theme === 'dark'
                                                             ? 'bg-[#1A73E8] hover:bg-[#1557B0] text-white'

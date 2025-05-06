@@ -48,7 +48,7 @@ const AdminRoute = ({ children }) => {
         if (!adminStatus) {
           toast.error('Ez az oldal csak adminisztrátorok számára elérhető!', {
             position: 'top-center',
-            autoClose: 5000,
+            autoClose: 2500,
           });
         }
       } catch (error) {
@@ -85,7 +85,7 @@ const AdminRoute = ({ children }) => {
     // Hiba jelzése
     toast.error('Ez az oldal csak adminisztrátorok számára elérhető!', {
       position: 'top-center',
-      autoClose: 3000,
+      autoClose: 2500,
       hideProgressBar: false,
       closeOnClick: true,
       pauseOnHover: true,
@@ -115,4 +115,4 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
-export default AdminRoute; 
+export default AdminRoute;

@@ -32,15 +32,23 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                 throw new Error(data.error || "Hiba történt a frissítés során");
             }
 
-            toast.success("Állat sikeresen megjelölve megtaláltként!");
+            // Először frissítünk
             if (onUpdate) {
                 onUpdate();
             }
+            
+            // Azután bezárjuk a modalt
+            setShowConfirmation(false);
+            setIsLoading(false);
+            
+            // Végül megjelenítjük a toast üzenetet
+            setTimeout(() => {
+                toast.success("Állat sikeresen megjelölve megtaláltként!");
+            }, 300);
         } catch (error) {
             toast.error(error.message);
-        } finally {
             setIsLoading(false);
-            setShowConfirmation(false); // Bezárjuk a megerősítő ablakot
+            setShowConfirmation(false);
         }
     };
 
@@ -52,10 +60,20 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
         setShowEditModal(true); // Szerkesztő ablak megjelenítése
     };
 
-    const handleEditComplete = () => {
-        if (onUpdate) {
+    const handleEditComplete = (updatedAnimal) => {
+        // Ha van frissített állat adat, frissítse a komponenst
+        console.log("Frissítés meghívva:", updatedAnimal);
+        
+        // Először frissítjük az adatokat
+        if (typeof onUpdate === 'function') {
+            // Az onUpdate függvény használatával azonnal értesítsük a szülő komponenst a változásról
             onUpdate();
         }
+        
+        // Azután zárjuk be a modalt
+        setTimeout(() => {
+            setShowEditModal(false);
+        }, 50);
     };
 
     return (
@@ -108,7 +126,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                 <div className="flex-grow">
                     <div className={`grid grid-cols-2 gap-3 mb-4 text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                         <div>
-                            <p><strong>Dátum:</strong> {animal.datum}</p>
+                            <p><strong>Dátum:</strong> {animal.elveszesIdeje}</p>
                             <p><strong>Nem:</strong> {animal.neme}</p>  
                         </div>
                         <div>
@@ -154,7 +172,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                     )}
                 </div>
             </div>
-            <ToastContainer />
+            <ToastContainer className="z-50" />
 
             {/* Megerősítő ablak */}
             {showConfirmation && (

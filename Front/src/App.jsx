@@ -1,7 +1,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { UserProvider } from "./context/UserContext";
-import { ThemeProvider } from "./context/ThemeContext"; // Importáljuk a ThemeProvider-t
+import { ThemeProvider } from "./context/ThemeContext";
 import Navbar from "./components/Assets/Navbar";
 import Footer from "./components/Assets/FooterComponents/Footer";
 import Home from "./components/HomePage/HomePage";
@@ -25,11 +25,7 @@ import ContactUs from "./components/Assets/FooterComponents/ContactUs";
 import UserMessages from "./components/LoggedUser/Profile/UserMessages";
 import AdminRoute from "./components/Auth/AdminRoute";
 
-
-// http://localhost:8000/felhasznalok/regisztracio
-// http://localhost:8000/felhasznalok/login
-// http://localhost:8000/felhasznalok/alluser
-
+// Fő App komponens, ami tartalmazza az útválasztást és a kontextus providereket
 function App() {
   return (
     <>
@@ -68,7 +64,18 @@ function App() {
           </Routes>
           <Footer />
         </Router>
-        <ToastContainer />
+        <ToastContainer 
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </UserProvider>
       </ThemeProvider>
     </>

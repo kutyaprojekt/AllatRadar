@@ -13,13 +13,6 @@ const MyProfile = () => {
   const token = localStorage.getItem("usertoken");
   const navigate = useNavigate();
   
-  console.log("[MyProfile] Rendering with:", { 
-    hasUser: Boolean(user), 
-    userId: user?.id,
-    contextLoading, 
-    localLoading 
-  });
-  
   // Kijelentkezés kezelése a szülő komponensben
   const handleLogout = () => {
     localStorage.removeItem("usertoken");
@@ -49,20 +42,11 @@ const MyProfile = () => {
       }
       
       try {
-        console.log("[MyProfile] Loading user data...");
-        setLocalLoading(true);
-        
         if (getCurrentUser && (!user || !user.id)) {
-          console.log("[MyProfile] Fetching user data via getCurrentUser");
           const userData = await getCurrentUser(token);
-          console.log("[MyProfile] User data fetched:", Boolean(userData));
-        } else {
-          console.log("[MyProfile] User data already available or getCurrentUser not available");
         }
       } catch (error) {
-        console.error("[MyProfile] Error loading user data:", error);
       } finally {
-        console.log("[MyProfile] Finished loading user data, setting localLoading to false");
         setLocalLoading(false);
       }
     };
@@ -70,31 +54,27 @@ const MyProfile = () => {
     loadUserData();
     
     return () => {
-      console.log("[MyProfile] Cleanup effect");
     };
   }, []); // Üres függőségek tömbje - csak egyszer fut le
 
   // Külön effect a felhasználó jelenlétének ellenőrzésére
   useEffect(() => {
-    console.log("[MyProfile] User changed:", { hasUser: Boolean(user), userId: user?.id });
   }, [user]);
 
   // A tényleges loading állapot a helyi és a kontextus loading állapotok kombinációja
   const isLoading = localLoading || contextLoading;
   
   if (isLoading) {
-    console.log("[MyProfile] Rendering loading state");
     return (
-      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#F0F4F8]'}`}>
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
         <div className="text-2xl font-bold">Betöltés...</div>
       </div>
     );
   }
 
   if (!user || !user.id) {
-    console.log("[MyProfile] Rendering error state - no user data");
     return (
-      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#F0F4F8]'}`}>
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
         <div className="text-2xl font-bold text-red-500">Nem sikerült betölteni a profil adatokat.</div>
         <ToastContainer 
           position="top-right"
@@ -112,22 +92,9 @@ const MyProfile = () => {
     );
   }
 
-  console.log("[MyProfile] Rendering profile with user:", user.username);
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-[#F0F4F8]'}`}>
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
       <MyProfileTemplate user={user} onLogout={handleLogout} />
-      <ToastContainer 
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme={theme === 'dark' ? 'dark' : 'light'}
-      />
     </div>
   );
 };

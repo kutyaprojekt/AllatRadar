@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { FaEnvelope, FaUser, FaPhone, FaKey, FaSave, FaTimes, FaUserShield } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
 import { useTheme } from '../../context/ThemeContext';
 import 'react-toastify/dist/ReactToastify.css';
 
-const UserEditModal = ({ user, onUpdate }) => {
+const UserEditModal = ({ user, onUpdate, onClose }) => {
     const modalId = `user-modal-${user.id}`;
     const [email, setEmail] = useState(user.email);
     const [username, setUsername] = useState(user.username);
@@ -63,6 +63,10 @@ const UserEditModal = ({ user, onUpdate }) => {
             console.error("Hiba történt a mentés során:", error);
             toast.error("Hiba történt a mentés során: " + error.message);
         }
+    };
+
+    const handleClose = () => {
+        onClose();
     };
 
     return (
@@ -189,7 +193,7 @@ const UserEditModal = ({ user, onUpdate }) => {
                     <div className="flex justify-end gap-3 pt-4">
                         <button
                             type="button"
-                            onClick={() => document.getElementById(modalId).close()}
+                            onClick={handleClose}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
                                 theme === 'dark'
                                     ? 'bg-gray-700 hover:bg-gray-600 text-white'

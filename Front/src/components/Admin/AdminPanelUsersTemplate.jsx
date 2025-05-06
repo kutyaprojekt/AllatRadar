@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const AdminPanelUsersTemplate = ({ user }) => {
+const AdminPanelUsersTemplate = ({ user, onShowModal }) => {
     const modalId = `my_modal_${user.id}`; // Egyedi modal azonosító
     const [email, setEmail] = useState(user.email); // Állapot az e-mail cím tárolására
     const [username, setUsername] = useState(user.username); // Állapot a felhasználónév tárolására
@@ -51,8 +51,8 @@ const AdminPanelUsersTemplate = ({ user }) => {
                 <p>{user.email}</p>
 
                 {/* Modal gomb és tartalom */}
-                <button className="btn btn-info" onClick={() => document.getElementById(modalId).showModal()}>
-                    Info
+                <button className="btn btn-info" onClick={() => onShowModal(modalId)}>
+                    Szerkesztés
                 </button>
                 <dialog id={modalId} className="modal">
                     <div className="modal-box">

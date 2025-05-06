@@ -4,6 +4,7 @@ import { FaUser, FaLock } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { useTheme } from "../../context/ThemeContext";
 
 const Login = () => {
@@ -31,23 +32,55 @@ const Login = () => {
     }));
   };
 
-  const login = async () => {
-    const response = await fetch("http://localhost:8000/felhasznalok/login", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(formState),
-    });
-    const data = await response.json();
-    if (data.token) {
-      localStorage.setItem("usertoken", data.token);
-      getCurrentUser(data.token);
-      SetRefresh((prev) => !prev);
-      navigate("/home");
+  const handleToastClose = () => {
+    // Navigálás a főoldalra
+    navigate('/home');
+    
+    // Kis késleltetéssel frissítjük az oldalt, hogy a navbar frissüljön
+    setTimeout(() => {
       window.location.reload();
-    } else {
-      toast(data.error);
+    }, 100);
+  };
+
+  const login = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/felhasznalok/login", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+        },
+        body: JSON.stringify(formState),
+      });
+      
+      const data = await response.json();
+      
+      if (data.token) {
+        // Token mentése és felhasználó lekérése
+        localStorage.setItem("usertoken", data.token);
+        await getCurrentUser(data.token);
+        SetRefresh((prev) => !prev);
+        
+        // Sikeres toast üzenet és időzített átirányítás
+        toast.success("Sikeres bejelentkezés!", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          onClose: handleToastClose
+        });
+      } else {
+        toast.error(data.error, {
+          position: "top-right",
+          autoClose: 2500
+        });
+      }
+    } catch (error) {
+      toast.error("Hiba történt a bejelentkezés során. Kérjük próbálja újra.", {
+        position: "top-right",
+        autoClose: 2500
+      });
     }
   };
 
@@ -106,7 +139,17 @@ const Login = () => {
           >
             Bejelentkezés
           </button>
-          <ToastContainer />
+          <ToastContainer 
+            position="top-right"
+            autoClose={1500}
+            hideProgressBar={false}
+            newestOnTop={true}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
         </div>
       </div>
     </div>

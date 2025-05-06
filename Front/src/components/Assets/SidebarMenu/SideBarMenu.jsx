@@ -73,7 +73,6 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
             }
             
             try {
-                console.log('Fetching pending posts, admin status:', isAdmin);
                 const response = await fetch('http://localhost:8000/felhasznalok/pending-posts', {
                     method: 'GET',
                     headers: {
@@ -83,17 +82,14 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Pending posts found:', data.length);
                     setPendingCount(data.length);
-                } else {
-                    console.error('Error fetching pending posts:', response.status);
                 }
             } catch (error) {
                 console.error('Error checking pending posts:', error);
             }
         };
 
-        // Initial check
+        // Elutasított és függő posztok ellenőrzése
         const checkNotifications = () => {
             checkRejectedPosts();
             checkPendingPosts();
@@ -103,18 +99,18 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
             checkNotifications();
         }
         
-        // Set up polling every 10 seconds
+        // 10 másodpercenként frissítjük az értesítéseket
         const intervalId = setInterval(() => {
             if (token) {
                 checkNotifications();
             }
         }, 10000);
         
-        // Clean up interval on unmount
+        // Intervallum törlése komponens unmountoláskor
         return () => clearInterval(intervalId);
     }, [token, refresh, isAdmin]);
 
-    // Force a refresh when isAdmin changes
+    // Admin státusz változásakor frissítés
     useEffect(() => {
         const checkPendingPosts = async () => {
             if (!isAdmin || !token) return;
@@ -130,7 +126,6 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                 
                 if (response.ok) {
                     const data = await response.json();
-                    console.log('Admin check - Pending posts:', data.length);
                     setPendingCount(data.length);
                 }
             } catch (error) {

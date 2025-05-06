@@ -1,98 +1,10 @@
 import React, { useState } from 'react';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaTimes, FaImage, FaCalendarAlt } from 'react-icons/fa';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-
-// Egyedi stílusok a dátumválasztóhoz
-const customDatePickerStyle = `
-  .react-datepicker-wrapper,
-  .react-datepicker__input-container {
-    display: block;
-    width: 100%;
-  }
-  .react-datepicker {
-    font-family: inherit;
-    border: 2px solid #1A73E8;
-    border-radius: 0.5rem;
-    overflow: hidden;
-  }
-  .react-datepicker__header {
-    background-color: #1A73E8;
-    border-bottom: none;
-    padding: 0.5rem;
-  }
-  .react-datepicker__current-month {
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-  }
-  .react-datepicker__day-name {
-    color: white;
-    font-weight: 500;
-  }
-  .react-datepicker__day {
-    color: #073F48;
-    border-radius: 0.25rem;
-  }
-  .react-datepicker__day:hover {
-    background-color: #1A73E8;
-    color: white;
-  }
-  .react-datepicker__day--selected {
-    background-color: #1A73E8;
-    color: white;
-  }
-  .react-datepicker__day--keyboard-selected {
-    background-color: #1A73E8;
-    color: white;
-  }
-  .react-datepicker__navigation {
-    top: 0.5rem;
-  }
-  .react-datepicker__navigation-icon::before {
-    border-color: white;
-  }
-  .dark .react-datepicker {
-    background-color: #1F2937;
-    border-color: #374151;
-  }
-  .dark .react-datepicker__header {
-    background-color: #374151;
-  }
-  .dark .react-datepicker__day {
-    color: #E5E7EB;
-  }
-  .dark .react-datepicker__day:hover {
-    background-color: #4B5563;
-  }
-  .dark .react-datepicker__day--selected {
-    background-color: #4B5563;
-  }
-  .dark .react-datepicker__day--keyboard-selected {
-    background-color: #4B5563;
-  }
-  .dark .react-datepicker__current-month,
-  .dark .react-datepicker__day-name {
-    color: #E5E7EB;
-  }
-  
-  /* DatePicker pozícionálási javítások */
-  .react-datepicker-popper {
-    z-index: 9999 !important;
-  }
-  
-  /* Mobilon kisebb méretű DatePicker */
-  @media (max-width: 640px) {
-    .react-datepicker {
-      font-size: 0.8rem;
-    }
-    .react-datepicker__current-month {
-      font-size: 0.9rem;
-    }
-  }
-`;
+import "../../../styles/datepicker.css"; // Importáljuk a Tailwind-alapú datepicker stílusokat
 
 const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
     const [formData, setFormData] = useState({
@@ -122,10 +34,10 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
     // Egyedi input a DatePicker komponenshez
     const CustomInput = React.forwardRef(({ value, onClick }, ref) => (
         <div className="relative w-full">
-            <FaCalendarAlt className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "text-gray-400" : "text-[#1A73E8]"} text-lg z-10`} />
+            <FaCalendarAlt className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "text-gray-400" : "text-blue-500"} text-lg z-10`} />
             <input
                 ref={ref}
-                className={`w-full pl-10 pr-3 py-2 border rounded-lg ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-[#073F48]"} focus:outline-none focus:ring-2 focus:ring-blue-300 text-base cursor-pointer`}
+                className={`w-full pl-10 pr-3 py-2 border rounded-lg ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-gray-800"} focus:outline-none focus:ring-2 focus:ring-blue-300 text-base cursor-pointer`}
                 value={value}
                 onClick={onClick}
                 readOnly
@@ -143,18 +55,6 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
             datum: finalDate.toISOString().split("T")[0]
         }));
     };
-
-    React.useEffect(() => {
-        // Adjuk hozzá az egyedi stílusokat a head-hez
-        const styleElement = document.createElement('style');
-        styleElement.textContent = customDatePickerStyle;
-        document.head.appendChild(styleElement);
-        
-        return () => {
-            // Távolítsuk el a stílusokat
-            styleElement.remove();
-        };
-    }, []);
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -212,20 +112,30 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                 throw new Error(data.error || 'Hiba történt a poszt frissítése során');
             }
             
-            toast.success(data.message || 'Poszt sikeresen frissítve!');
-            if (onUpdate) {
-                onUpdate();
-            }
+            // ELŐSZÖR frissítünk
+            // Bezárjuk a modalt
             onClose();
+            
+            // Adjuk át a frissített adatokat az onUpdate függvénynek
+            if (typeof onUpdate === 'function') {
+                console.log("Átadom a frissített adatokat:", data.animal);
+                onUpdate(data.animal);
+            }
+            
+            // UTÁNA jelenítjük meg a toast üzenetet
+            setTimeout(() => {
+                toast.success(data.message || 'Poszt sikeresen frissítve!');
+            }, 300);
+            
         } catch (error) {
             toast.error(error.message);
-        } finally {
             setIsLoading(false);
         }
     };
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
+            <ToastContainer className="z-50" />
             <div className="flex items-center justify-center min-h-screen px-4 py-6">
                 {/* Háttér overlay */}
                 <div 
@@ -384,6 +294,8 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                                         maxDate={new Date()}
                                         required
                                         showPopperArrow={false}
+                                        popperClassName="datepicker-popper-left"
+                                        popperPlacement="bottom-start"
                                     />
                                 </div>
                             </div>

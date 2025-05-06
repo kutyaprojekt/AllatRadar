@@ -34,16 +34,15 @@ const RegisterMyLostPet = () => {
 
   const [file, setFile] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [preview, setPreview] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     document.body.className = theme === "dark" ? "bg-gray-900 text-white dark" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe] text-[#073F48]";
-    
+
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
+
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
     return () => {
@@ -53,16 +52,16 @@ const RegisterMyLostPet = () => {
 
   const writeData = (e) => {
     const { id, value } = e.target;
-    
+
     // Fields that should have first letter of each word capitalized
     const capitalizeFields = ['allatfaj', 'allatkategoria', 'allatneme', 'allatszine', 'eltuneshelyszine'];
-    
+
     if (capitalizeFields.includes(id)) {
       const capitalizedValue = value
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
-      
+
       setFormState(prevState => ({
         ...prevState,
         [id]: capitalizedValue
@@ -78,12 +77,12 @@ const RegisterMyLostPet = () => {
   const handleDateChange = (date) => {
     const finalDate = date || new Date();
     setSelectedDate(finalDate);
-    
+
     // Format the date as YYYY-MM-DD for storage
     const year = finalDate.getFullYear();
     const month = (finalDate.getMonth() + 1).toString().padStart(2, '0');
     const day = finalDate.getDate().toString().padStart(2, '0');
-    
+
     setFormState(prev => ({
       ...prev,
       mikorveszettel: `${year}-${month}-${day}`
@@ -94,11 +93,6 @@ const RegisterMyLostPet = () => {
     const file = e.target.files[0];
     if (file) {
       setFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreview(reader.result);
-      };
-      reader.readAsDataURL(file);
     }
   };
 
@@ -117,9 +111,6 @@ const RegisterMyLostPet = () => {
       }
     }
     formData.append("file", file);
-    
-    // Az eltűnés időpontját már beállítottuk a formState-ben, nem kell újra hozzáadni
-    // formData.append("mikorveszettel", formState.mikorveszettel);
 
     try {
       const response = await fetch("http://localhost:8000/felhasznalok/elveszettallat", {
@@ -132,14 +123,24 @@ const RegisterMyLostPet = () => {
 
       const data = await response.json();
       if (data.message === "Sikeres adatfelvitel!") {
-        toast.success("Sikeres adatfelvitel!");
         SetRefresh((prev) => !prev);
+        
+        // Egyetlen toast üzenet jóváhagyásról
+        toast.success("Bejegyzése jóváhagyásra vár", {
+          position: "top-right",
+          autoClose: 1500,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          onClose: () => navigate("/home") // Toast bezárása után navigálás
+        });
       } else {
-        toast.error(data.error);
+        toast.error(data.error || "Hiba történt a feltöltés során");
       }
     } catch (error) {
       console.error("Hiba történt az adatküldéskor:", error);
-      toast.error("Hiba történt az adatküldéskor.");
+      toast.error("Hiba történt az adatküldéskor: " + (error.message || error));
     }
   };
 
@@ -266,7 +267,7 @@ const RegisterMyLostPet = () => {
         </div>
       )}
 
-       
+
     </>
   );
 
@@ -393,11 +394,6 @@ const RegisterMyLostPet = () => {
             required
           />
         </div>
-        {preview && (
-          <div className="mt-4 flex justify-center">
-            <img src={preview} alt="Preview" className="w-24 h-24 object-cover rounded" />
-          </div>
-        )}
       </div>
 
       {/* Navigációs gombok - csak mobilnézetben */}
@@ -433,29 +429,27 @@ const RegisterMyLostPet = () => {
               <div className="flex items-center w-full max-w-xs relative">
                 {[1, 2, 3].map((step) => (
                   <React.Fragment key={step}>
-                    <div 
-                      className={`w-8 h-8 rounded-full flex items-center justify-center z-10 ${
-                        currentStep >= step 
-                          ? theme === "dark" 
-                            ? "bg-blue-500 text-white" 
-                            : "bg-[#0c4a6e] text-white" 
-                          : theme === "dark" 
-                            ? "bg-gray-600 text-gray-300" 
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center z-10 ${currentStep >= step
+                          ? theme === "dark"
+                            ? "bg-blue-500 text-white"
+                            : "bg-[#0c4a6e] text-white"
+                          : theme === "dark"
+                            ? "bg-gray-600 text-gray-300"
                             : "bg-gray-200 text-gray-500"
-                      }`}
+                        }`}
                     >
                       {step}
                     </div>
                     {step < 3 && (
-                      <div className={`flex-1 h-1 ${
-                        currentStep > step 
-                          ? theme === "dark" 
-                            ? "bg-blue-500" 
-                            : "bg-[#0c4a6e]" 
-                          : theme === "dark" 
-                            ? "bg-gray-600" 
+                      <div className={`flex-1 h-1 ${currentStep > step
+                          ? theme === "dark"
+                            ? "bg-blue-500"
+                            : "bg-[#0c4a6e]"
+                          : theme === "dark"
+                            ? "bg-gray-600"
                             : "bg-gray-200"
-                      }`}></div>
+                        }`}></div>
                     )}
                   </React.Fragment>
                 ))}
@@ -468,7 +462,7 @@ const RegisterMyLostPet = () => {
             </div>
           </div>
         ) : (
-          <h1 className={`text-2xl font-bold mb-6 text-center ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
+          <h1 className={`text-3xl font-bold mb-6 text-center ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
             Elveszett állatom regisztrálása
           </h1>
         )}
@@ -520,11 +514,6 @@ const RegisterMyLostPet = () => {
                     required
                   />
                 </div>
-                {preview && (
-                  <div className="mt-4 flex justify-center">
-                    <img src={preview} alt="Preview" className="w-24 h-24 object-cover rounded" />
-                  </div>
-                )}
               </div>
               {!isMobile && (
                 <div className="col-span-2 flex justify-center mt-4">
@@ -542,39 +531,59 @@ const RegisterMyLostPet = () => {
       </div>
 
       {/* Jobb oldal: Kép és inspiráló szöveg (csak gépi nézetben) */}
-      {!isMobile && (
-        <div className="hidden xl:flex flex-col justify-center items-center ml-8 w-1/3">
-          <div className={`mt-6 text-center p-8 rounded-3xl shadow-xl border-2 ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white bg-opacity-90 border-[#0c4a6e]"}`}>
-            <h2 className={`text-3xl font-bold ${theme === "dark" ? "text-white" : "text-[#0c4a6e]"} mb-6`}>
+      <div className="hidden xl:flex flex-col justify-center items-center ml-8 w-1/3">
+        <div className={`mt-6 text-center p-8 rounded-3xl shadow-xl border-2 ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white bg-opacity-90 border-[#0c4a6e]"} flex flex-col justify-between`} style={{ minHeight: "600px" }}>
+          <div>
+            <h2 className={`text-3xl font-bold ${theme === "dark" ? "text-white" : "text-[#0c4a6e]"} mb-4`}>
               Segíts megtalálni elveszett kedvencedet!
             </h2>
-            <div className="mb-6">
-              <img src="/images/lost-pet.svg" alt="Elveszett kisállat" className="mx-auto h-48 mb-4" 
-                  onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }} />
-            </div>
-            <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-[#074F57]"} mb-6 leading-relaxed`}>
-              Az elveszett kisállatod mihamarabbi megtalálása érdekében <span className={`font-semibold ${theme === "dark" ? "text-white" : ""}`}>minél pontosabb információkat</span> adj meg! 
+            <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-[#074F57]"} mb-5 leading-relaxed`}>
+              Az elveszett kisállatod mihamarabbi megtalálása érdekében <span className={`font-semibold ${theme === "dark" ? "text-white" : ""}`}>minél pontosabb információkat</span> adj meg!
               Minél részletesebb a leírásod, annál nagyobb az esélye, hogy valaki felismeri kedvencedet.
             </p>
-            <p className={`text-lg ${theme === "dark" ? "text-gray-300" : "text-[#074F57]"} mb-6 leading-relaxed`}>
-              <span className={`text-xl font-semibold block mb-2 ${theme === "dark" ? "text-gray-200" : "text-[#0c4a6e]"}`}>Hasznos tippek:</span>
-              <ul className="list-disc list-inside space-y-2 text-left">
-                <li>Tölts fel jó minőségű, felismerhető képet</li>
-                <li>Add meg a pontos helyszínt, ahol utoljára láttad</li>
-                <li>Írd le kedvenced egyedi ismertetőjegyeit</li>
-                <li>Tüntesd fel a chipszámot, ha rendelkezik vele</li>
-                <li>Oszd meg a hirdetést a közösségi médiában is</li>
-              </ul>
-            </p>
-            <div className={`mt-8 p-5 rounded-xl ${theme === "dark" ? "bg-gray-700" : "bg-[#e1f5fe]"}`}>
+          </div>
+
+          <div className="flex-grow">
+            <p className={`text-xl font-semibold mb-3 ${theme === "dark" ? "text-gray-200" : "text-[#0c4a6e]"}`}>Hasznos tippek:</p>
+            <ul className={`list-disc list-inside space-y-2 text-left text-lg ${theme === "dark" ? "text-gray-300" : "text-[#074F57]"}`}>
+              <li>Tölts fel jó minőségű, felismerhető képet</li>
+              <li>Add meg a pontos helyszínt, ahol utoljára láttad</li>
+              <li>Írd le kedvenced egyedi ismertetőjegyeit</li>
+              <li>Tüntesd fel a chipszámot, ha rendelkezik vele</li>
+              <li>Oszd meg a hirdetést a közösségi médiában is</li>
+            </ul>
+          </div>
+
+          <div>
+            <div className="flex items-center justify-center my-4">
+              <img
+                src="/images/lost-pet.svg"
+                alt="Elveszett kisállat"
+                className="mx-auto max-h-32 max-w-full"
+                onError={(e) => { e.target.onerror = null; e.target.style.display = 'none'; }}
+              />
+            </div>
+
+            <div className={`p-5 rounded-xl ${theme === "dark" ? "bg-gray-700" : "bg-[#e1f5fe]"}`}>
               <p className={`font-medium text-lg ${theme === "dark" ? "text-white" : "text-[#0c4a6e]"}`}>
                 Oldalunkon az elmúlt évben több mint <span className="font-bold">2,500</span> kisállat talált haza gazdájához a közösség segítségével!
               </p>
             </div>
           </div>
         </div>
-      )}
-      <ToastContainer />
+      </div>
+      <ToastContainer 
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme={theme === "dark" ? "dark" : "light"}
+      />
     </div>
   );
 };
