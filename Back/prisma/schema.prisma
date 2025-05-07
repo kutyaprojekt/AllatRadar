@@ -9,35 +9,35 @@ datasource db {
 
 // Felhasználó modell
 model User {
-  id             Int      @id @default(autoincrement())
-  email          String   @unique
-  username       String
-  password       String
-  phonenumber    String
-  admin          String   @default("false")
-  profilePicture String?
-  animals        Animal[] @relation("UserAnimals")
+  id             Int      @id @default(autoincrement()) // felhasznalo id
+  email          String   @unique // felhasznalo email
+  username       String  // felhasznalo username
+  password       String  // felhasznalo jelszo
+  phonenumber    String  // felhasznalo telefonszam 
+  admin          String   @default("false")  // felhasznalo admin-e vagy sem
+  profilePicture String? // felhasznalo profilkep
+  animals        Animal[] @relation("UserAnimals") // felhasznalo allatai
 
   @@map("users")
 }
 
 // Állat hirdetés modell
 model Animal {
-  id               Int     @id @default(autoincrement())
+  id               Int     @id @default(autoincrement())  // allat id
   talalt_elveszett String  // Állat státusza (talált vagy elveszett)
-  allatfaj         String 
-  kategoria        String? // Állat kategóriája
+  allatfaj         String  // állatfaj (kutya, macska stb)
+  kategoria        String? // Állat kategóriája (németdog stb)
   datum            String  // Feltöltés dátuma
   elveszesIdeje    String? // Eltűnés/megtalálás dátuma
   neme             String  @default("Ismeretlen")
   szin             String
   meret            String
   egyeb_info       String? // Egyéb információ
-  helyszin         String
-  filePath         String
-  visszakerult_e   String
-  chipszam         BigInt?
-  elutasitva       String  @default("")
+  helyszin         String // hol veszett el
+  filePath         String ? // a feltöltött kép elérési útvonala
+  visszakerult_e   String ? // Visszakerült-e az állat
+  chipszam         BigInt? 
+  elutasitva       String  @default("") 
   elutasitasoka    String  @default("")
   visszajelzes     String  @default("")
 
