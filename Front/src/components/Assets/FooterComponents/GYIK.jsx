@@ -6,11 +6,11 @@ const GYIK = () => {
   const { theme } = useTheme();
 
   return (
-    <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-gradient-to-r from-[#64B6FF] to-[#A7D8FF] text-[#073F48]"} min-h-screen pt-24 py-12 px-4 sm:px-6 lg:px-8`}>
+    <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe] text-[#073F48]"} min-h-screen pt-24 py-12 px-4 sm:px-6 lg:px-8`}>
       <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} max-w-4xl mx-auto shadow-lg rounded-lg p-6 sm:p-8`}>
-      <h1 className={`text-3xl sm:text-4xl font-bold text-center ${theme === "dark" ? "text-white" : "text-gray-900"} mb-8`}>
-  Gyakran Ismételt Kérdések
-</h1>
+        <h1 className={`text-3xl sm:text-4xl font-bold text-center ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-8`}>
+          Gyakran Ismételt Kérdések
+        </h1>
 
         {/* Mi az ÁllatRadar? */}
         <div className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-600"} mb-8 p-6 rounded-lg shadow-sm`}>
@@ -32,33 +32,23 @@ const GYIK = () => {
           </p>
         </div>
 
-        {/* Működik? */}
+        {/* Hogyan működik? */}
         <div className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-600"} mb-8 p-6 rounded-lg shadow-sm`}>
           <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-            Működik?
+            Hogyan működik?
           </h2>
           <p className="text-sm sm:text-base">
-            Igen, az ÁllatRadar hatékonyan segít az elveszett háziállatok és gazdáik újraegyesítésében. Bár a sikerességi ráta függhet olyan tényezőktől, mint a riasztás gyorsasága vagy a közösség reakciókészsége, sok háziállat tulajdonosnak sikerült már megtalálnia elveszett kedvencét az ÁllatRadar segítségével.
+            Az ÁllatRadar használata egyszerű: regisztrálj, töltsd fel az elveszett állatod adatait és fotóját, majd a rendszer automatikusan értesíti a környéken lévő felhasználókat. Ha megtaláltál egy állatot, hasonlóképpen bejelentheted, és segíthetsz a gazdi megtalálásában.
           </p>
         </div>
 
-        {/* Mi az ÁllatRadar riasztás? */}
-        <div className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-600"} mb-8 p-6 rounded-lg shadow-sm`}>
-          <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-            Mi az ÁllatRadar riasztás?
-          </h2>
-          <p className="text-sm sm:text-base">
-            Az ÁllatRadar riasztás olyan, mint egy AMBER riasztás, de elveszett vagy megtalált háziállatokra. A riasztások célja, hogy gyorsan terjesztsék az információt az elveszett vagy megtalált állatokról, kihasználva a közösségi média és a közösség erejét a sikeres újraegyesítés érdekében.
-          </p>
-        </div>
-
-        {/* További kérdések? */}
+        {/* További segítség */}
         <div className="text-center mt-12">
           <p className={`${theme === "dark" ? "text-white" : "text-gray-600"} text-sm sm:text-base mb-4`}>
             További kérdéseid vannak? Lépj kapcsolatba velünk!
           </p>
           <button className={`${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-[#64B6FF] hover:bg-[#52a8f5] text-white"} font-semibold py-2 px-6 rounded-full transition duration-300 shadow-lg`}>
-            <Link to={"/kapcsolat"}>Kapcsolat</Link>
+            <Link to="/kapcsolat">Kapcsolat</Link>
           </button>
         </div>
       </div>

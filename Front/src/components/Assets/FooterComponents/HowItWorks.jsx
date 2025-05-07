@@ -6,7 +6,7 @@ const HowItWorks = () => {
     const { theme } = useTheme();
 
     return (
-        <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-[#073F48]"} min-h-screen pt-16`}>
+        <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe] text-[#073F48]"} min-h-screen pt-16`}>
             {/* Hero Section */}
             <div className={`${theme === "dark" ? "bg-gray-800" : "bg-gradient-to-r from-[#64B6FF] to-[#A7D8FF]"} text-white py-12 md:py-32 relative overflow-hidden`}>
                 <div className="container mx-auto px-4 text-center relative z-10">
@@ -22,33 +22,33 @@ const HowItWorks = () => {
                 <h2 className={`text-2xl md:text-4xl font-bold text-center ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-6 md:mb-16`}>Három Egyszerű Lépésben</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Step 1 */}
-                    <div className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} p-6 rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105`}>
+                    <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} p-6 rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105`}>
                         <div className="text-center mb-4">
                             <span className={`${theme === "dark" ? "text-white" : "text-[#073F48]"} text-4xl font-bold`}>1</span>
                         </div>
-                        <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-4`}>Állat Bejelentése</h3>
+                        <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-4 text-center`}>Állat Bejelentése</h3>
                         <p className={`${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                             Regisztrálj és töltsd fel az elveszett állatod adatait, beleértve a fajt, nevet, színt, méretet és a helyet, ahol eltűnt.
                         </p>
                     </div>
 
                     {/* Step 2 */}
-                    <div className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} p-6 rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105`}>
+                    <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} p-6 rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105`}>
                         <div className="text-center mb-4">
                             <span className={`${theme === "dark" ? "text-white" : "text-[#073F48]"} text-4xl font-bold`}>2</span>
                         </div>
-                        <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-4`}>Állatok Feltöltése és Keresése</h3>
+                        <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-4 text-center`}>Állatok Feltöltése és Keresése</h3>
                         <p className={`${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                             Az ÁllatRadaron keresztül egyszerűen feltöltheted az elveszett vagy megtalált állatod adatait, és más felhasználók közöttük kereshetnek. Így növelheted az esélyét, hogy megtalálják az elveszett kedvenced, vagy visszaadj egy megtalált állatot gazdájának.
                         </p>
                     </div>
 
                     {/* Step 3 */}
-                    <div className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} p-6 rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105`}>
+                    <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} p-6 rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105`}>
                         <div className="text-center mb-4">
                             <span className={`${theme === "dark" ? "text-white" : "text-[#073F48]"} text-4xl font-bold`}>3</span>
                         </div>
-                        <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-4`}>Állat Visszakerülése</h3>
+                        <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-4 text-center`}>Állat Visszakerülése</h3>
                         <p className={`${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                             A közösség segítségével az elveszett állatod hamarosan visszakerülhet hozzád. Kövesd nyomon a jelentéseket és kapcsolódj a megtalálókkal.
                         </p>

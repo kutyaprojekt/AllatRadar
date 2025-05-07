@@ -5,7 +5,7 @@ const AboutUs = () => {
   const { theme } = useTheme();
 
   return (
-    <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-gradient-to-r from-[#64B6FF] to-[#A7D8FF] text-[#073F48]"} min-h-screen pt-24 py-12 px-4 sm:px-6 lg:px-8`}>
+    <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe] text-[#073F48]"} min-h-screen pt-24 py-12 px-4 sm:px-6 lg:px-8`}>
       <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} max-w-4xl mx-auto shadow-lg rounded-lg p-6 sm:p-8`}>
         <h1 className="text-3xl sm:text-4xl font-bold text-center mb-8">
           Rólunk
@@ -31,8 +31,8 @@ const AboutUs = () => {
           </p>
           <ul className="list-disc list-inside mt-2">
             <li><strong>Sóki Zalán</strong> - A frontend varázsló, aki az oldal designjáért és felhasználói élményéért felel.</li>
-            <li><strong>Bodrogi Zétény</strong> -  A backend mestere, aki biztosítja, hogy az oldal gyorsan és megbízhatóan működjön.</li>
-            <li><strong>Páskuj Csaba</strong> - A projektmenedzser, aki összetartja a csapatot és gondoskodik arról, hogy minden zökkenőmentesen menjen.</li>
+            <li><strong>Bodrogi Zétény</strong> - A projekt vezető és szenior backend fejlesztő, aki a rendszer architektúrájának tervezéséért és implementálásáért felelős. Kiemelkedő szakértelme a szerveroldali logika és adatbázis optimalizálás területén, valamint a fejlesztői csapat koordinálásában.</li>
+            <li><strong>Páskuj Csaba</strong> - A projekt dokumentáció és prezentáció készítője, aki gondoskodik a projekt megfelelő dokumentálásáról és bemutatásáról. A projekt leírás és tervezés mestere, aki részletes dokumentációt készített a fejlesztési folyamatról, és kiváló prezentációkat állított össze a projekt bemutatásához. Kiemelkedő szerepet játszott a projekt koncepciójának kidolgozásában és a fejlesztési terv megalkotásában.</li>
           </ul>
           <p className="text-sm sm:text-base mt-4">
             Együtt hoztuk létre az ÁllatRadart, hogy segítsünk azoknak, akik elvesztették kedvencüket. Hiszünk abban, hogy a technológia nem csupán az életünket könnyíti meg, hanem segíthet mások életét is jobbá tenni.
