@@ -12,7 +12,6 @@ const GYIK = () => {
           Gyakran Ismételt Kérdések
         </h1>
 
-        {/* Mi az ÁllatRadar? */}
         <div className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-600"} mb-8 p-6 rounded-lg shadow-sm`}>
           <h2 className="text-xl sm:text-2xl font-semibold mb-4">
             Mi az ÁllatRadar?
@@ -22,7 +21,6 @@ const GYIK = () => {
           </p>
         </div>
 
-        {/* Ingyen használható? */}
         <div className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-600"} mb-8 p-6 rounded-lg shadow-sm`}>
           <h2 className="text-xl sm:text-2xl font-semibold mb-4">
             Ingyen használható?
@@ -32,7 +30,6 @@ const GYIK = () => {
           </p>
         </div>
 
-        {/* Hogyan működik? */}
         <div className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-600"} mb-8 p-6 rounded-lg shadow-sm`}>
           <h2 className="text-xl sm:text-2xl font-semibold mb-4">
             Hogyan működik?
@@ -42,7 +39,6 @@ const GYIK = () => {
           </p>
         </div>
 
-        {/* További segítség */}
         <div className="text-center mt-12">
           <p className={`${theme === "dark" ? "text-white" : "text-gray-600"} text-sm sm:text-base mb-4`}>
             További kérdéseid vannak? Lépj kapcsolatba velünk!

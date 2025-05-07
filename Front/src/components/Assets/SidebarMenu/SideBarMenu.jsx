@@ -61,12 +61,12 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                     setRejectedCount(data.length);
                 }
             } catch (error) {
-                console.error('Error checking rejected posts:', error);
+                // Hiba ellenőrzéskor
             }
         };
 
         const checkPendingPosts = async () => {
-            // Csak akkor ellenőrizzük a jóváhagyásra váró posztokat, ha admin a felhasználó
+            // Csak admin esetén ellenőrzés
             if (!isAdmin) {
                 setPendingCount(0);
                 return;
@@ -85,11 +85,11 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                     setPendingCount(data.length);
                 }
             } catch (error) {
-                console.error('Error checking pending posts:', error);
+                // Hiba függő posztok ellenőrzésekor
             }
         };
 
-        // Elutasított és függő posztok ellenőrzése
+        // Értesítések ellenőrzése
         const checkNotifications = () => {
             checkRejectedPosts();
             checkPendingPosts();
@@ -99,18 +99,18 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
             checkNotifications();
         }
         
-        // 10 másodpercenként frissítjük az értesítéseket
+        // Értesítések frissítése 10 másodpercenként
         const intervalId = setInterval(() => {
             if (token) {
                 checkNotifications();
             }
         }, 10000);
         
-        // Intervallum törlése komponens unmountoláskor
+        // Intervallum törlése
         return () => clearInterval(intervalId);
     }, [token, refresh, isAdmin]);
 
-    // Admin státusz változásakor frissítés
+    // Admin státusz változás esetén
     useEffect(() => {
         const checkPendingPosts = async () => {
             if (!isAdmin || !token) return;
@@ -129,7 +129,7 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                     setPendingCount(data.length);
                 }
             } catch (error) {
-                console.error('Error in admin pending posts check:', error);
+                // Hiba admin posztok ellenőrzésekor
             }
         };
         
@@ -212,7 +212,7 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                             <FaEnvelope className="mr-3 text-lg" />
                             <span className="font-medium">Üzenetek</span>
                             {rejectedCount > 0 && (
-                                <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full">
                                     {rejectedCount}
                                 </span>
                             )}
@@ -241,7 +241,7 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                                         <FaClipboardList className="mr-3 text-lg" />
                                         <span className="font-medium">Bejegyzések</span>
                                         {pendingCount > 0 && (
-                                            <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                                            <span className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full">
                                                 {pendingCount}
                                             </span>
                                         )}
@@ -249,7 +249,7 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                                     
                                     <Link
                                         to="/adminusers"
-                                        className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                                        className={`flex items-center px-4 py-3 mt-2 rounded-lg transition-colors ${
                                             currentTab === 'felhasznalok'
                                                 ? theme === 'dark' 
                                                     ? 'bg-gray-700 text-white' 
@@ -327,7 +327,7 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                     <FaEnvelope className="mr-3 text-lg" />
                     <span className="font-medium">Üzenetek</span>
                     {rejectedCount > 0 && (
-                        <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                        <span className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full">
                             {rejectedCount}
                         </span>
                     )}
@@ -354,7 +354,7 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                             <FaClipboardList className="mr-3 text-lg" />
                             <span className="font-medium">Bejegyzések</span>
                             {pendingCount > 0 && (
-                                <span className="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full">
+                                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 inline-flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full">
                                     {pendingCount}
                                 </span>
                             )}
@@ -362,7 +362,7 @@ const SideBarMenu = ({ isAdmin = false, activeTab, setActiveTab }) => {
                         
                         <Link
                             to="/adminusers"
-                            className={`flex items-center px-4 py-3 rounded-lg transition-colors ${
+                            className={`flex items-center px-4 py-3 mt-2 rounded-lg transition-colors ${
                                 currentTab === 'felhasznalok'
                                     ? theme === 'dark' 
                                         ? 'bg-gray-700 text-white' 

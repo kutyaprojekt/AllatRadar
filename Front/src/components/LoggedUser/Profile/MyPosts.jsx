@@ -31,17 +31,16 @@ const MyPosts = () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            
+
             if (!response.ok) {
                 throw new Error('Nem sikerült betölteni a posztokat');
             }
-            
+
             const data = await response.json();
-        // Sort posts by createdAt date in descending order (newest first)
+            // Posztok rendezése dátum szerint (újabbak előre)
             const sortedPosts = data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        setPosts(sortedPosts);
+            setPosts(sortedPosts);
         } catch (error) {
-            console.error('Hiba történt a posztok betöltésekor:', error);
             toast.error('Nem sikerült betölteni a posztokat');
         } finally {
             setLoading(false);
@@ -54,15 +53,15 @@ const MyPosts = () => {
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
-        
-        // Ellenőrizzük, hogy a felhasználó próbál-e "megtalált" státuszt adni nem jóváhagyott posztnak
+
+        // Megtalált státusz ellenőrzése nem jóváhagyott poszt esetén
         if (name === 'status' && value === 'solved' && isEditingPost) {
             if (currentPost.elutasitva === "" || currentPost.elutasitva === "true") {
                 toast.error("Csak jóváhagyott posztokat lehet megtaláltnak jelölni!");
-                return; // Ne állítsa be az értéket
+                return;
             }
         }
-        
+
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -71,24 +70,24 @@ const MyPosts = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        // Ellenőrizzük, hogy a felhasználó próbál-e "megtalált" státuszt adni nem jóváhagyott posztnak
+
+        // Megtalált státusz ellenőrzése nem jóváhagyott poszt esetén
         if (isEditingPost) {
             if (formData.status === 'solved') {
-                // Ellenőrizzük a poszt jóváhagyási állapotát
+                // Poszt jóváhagyási állapot ellenőrzése
                 if (!currentPost || currentPost.elutasitva === "" || currentPost.elutasitva === "true") {
                     toast.error("Csak jóváhagyott posztokat lehet megtaláltnak jelölni!");
                     return;
                 }
             }
-            
-            // Ha a poszt nem jóváhagyott, ne engedjük szerkeszteni
+
+            // Nem jóváhagyott poszt szerkesztési ellenőrzés
             if (!currentPost || currentPost.elutasitva === "" || currentPost.elutasitva === "true") {
                 toast.error("Nem jóváhagyott poszt nem szerkeszthető!");
                 return;
             }
         }
-        
+
         try {
             if (isEditingPost) {
                 // Poszt szerkesztése
@@ -100,11 +99,11 @@ const MyPosts = () => {
                     },
                     body: JSON.stringify(formData)
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('Nem sikerült frissíteni a posztot');
                 }
-                
+
                 toast.success("A poszt sikeresen frissítve!");
             } else {
                 // Új poszt létrehozása
@@ -116,45 +115,44 @@ const MyPosts = () => {
                     },
                     body: JSON.stringify(formData)
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('Nem sikerült létrehozni az új posztot');
                 }
-                
+
                 toast.success("Az új poszt sikeresen létrehozva!");
             }
-            
-            // Frissítsük a posztok listáját
+
+            // Posztok listájának frissítése
             fetchPosts();
-            
+
             // Űrlap visszaállítása
-        setIsAddingPost(false);
-        setIsEditingPost(false);
-        setCurrentPost(null);
-        setFormData({
-            title: '',
-            description: '',
-            location: '',
-            date: '',
-            status: 'active'
-        });
-            
-            // Frissítsük a felhasználói kontextust is
+            setIsAddingPost(false);
+            setIsEditingPost(false);
+            setCurrentPost(null);
+            setFormData({
+                title: '',
+                description: '',
+                location: '',
+                date: '',
+                status: 'active'
+            });
+
+            // Felhasználói kontextus frissítése
             SetRefresh(prev => !prev);
-            
+
         } catch (error) {
-            console.error('Hiba történt:', error);
             toast.error(error.message);
         }
     };
 
     const handleEdit = (post) => {
-        // Ellenőrizzük, hogy a poszt jóváhagyott-e
+        // Poszt jóváhagyás ellenőrzése
         if (post.elutasitva === "" || post.elutasitva === "true") {
             toast.error("Nem módosítható olyan poszt, ami nincs jóváhagyva!");
             return;
         }
-        
+
         setCurrentPost(post);
         setFormData({
             title: post.title,
@@ -176,20 +174,19 @@ const MyPosts = () => {
                         'Authorization': `Bearer ${token}`
                     }
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('Nem sikerült törölni a posztot');
                 }
-                
-                // Frissítsük a posztok listáját
+
+                // Posztok listájának frissítése
                 fetchPosts();
                 toast.success("A poszt sikeresen törölve!");
-                
-                // Frissítsük a felhasználói kontextust is
+
+                // Felhasználói kontextus frissítése
                 SetRefresh(prev => !prev);
-                
+
             } catch (error) {
-                console.error('Hiba történt:', error);
                 toast.error(error.message);
             }
         }
@@ -206,11 +203,10 @@ const MyPosts = () => {
                         </h2>
                         <button
                             onClick={() => setIsAddingPost(true)}
-                            className={`flex items-center px-4 py-2 md:px-5 md:py-2.5 rounded-lg font-medium transition-colors ${
-                                theme === 'dark' 
-                                    ? 'bg-[#1A73E8] hover:bg-[#1557B0] text-white' 
+                            className={`flex items-center px-4 py-2 md:px-5 md:py-2.5 rounded-lg font-medium transition-colors ${theme === 'dark'
+                                    ? 'bg-[#1A73E8] hover:bg-[#1557B0] text-white'
                                     : 'bg-[#1A73E8] hover:bg-[#1557B0] text-white'
-                            }`}
+                                }`}
                         >
                             <FaPlus className="w-4 h-4 md:w-5 md:h-5 mr-2" />
                             Új poszt
@@ -233,11 +229,10 @@ const MyPosts = () => {
                                         name="title"
                                         value={formData.title}
                                         onChange={handleInputChange}
-                                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${
-                                            theme === 'dark' 
-                                                ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]' 
+                                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${theme === 'dark'
+                                                ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]'
                                                 : 'border-gray-300 bg-white text-[#073F48] focus:ring-[#1A73E8] focus:border-[#1A73E8]'
-                                        }`}
+                                            }`}
                                         required
                                     />
                                 </div>
@@ -252,11 +247,10 @@ const MyPosts = () => {
                                         value={formData.description}
                                         onChange={handleInputChange}
                                         rows="4"
-                                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${
-                                            theme === 'dark' 
-                                                ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]' 
+                                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${theme === 'dark'
+                                                ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]'
                                                 : 'border-gray-300 bg-white text-[#073F48] focus:ring-[#1A73E8] focus:border-[#1A73E8]'
-                                        }`}
+                                            }`}
                                         required
                                     />
                                 </div>
@@ -272,11 +266,10 @@ const MyPosts = () => {
                                             name="location"
                                             value={formData.location}
                                             onChange={handleInputChange}
-                                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${
-                                                theme === 'dark' 
-                                                    ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]' 
+                                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${theme === 'dark'
+                                                    ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]'
                                                     : 'border-gray-300 bg-white text-[#073F48] focus:ring-[#1A73E8] focus:border-[#1A73E8]'
-                                            }`}
+                                                }`}
                                             required
                                         />
                                     </div>
@@ -291,11 +284,10 @@ const MyPosts = () => {
                                             name="date"
                                             value={formData.date}
                                             onChange={handleInputChange}
-                                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${
-                                                theme === 'dark' 
-                                                    ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]' 
+                                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${theme === 'dark'
+                                                    ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]'
                                                     : 'border-gray-300 bg-white text-[#073F48] focus:ring-[#1A73E8] focus:border-[#1A73E8]'
-                                            }`}
+                                                }`}
                                             required
                                         />
                                     </div>
@@ -310,18 +302,17 @@ const MyPosts = () => {
                                         name="status"
                                         value={formData.status}
                                         onChange={handleInputChange}
-                                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${
-                                            theme === 'dark' 
-                                                ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]' 
+                                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${theme === 'dark'
+                                                ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]'
                                                 : 'border-gray-300 bg-white text-[#073F48] focus:ring-[#1A73E8] focus:border-[#1A73E8]'
-                                        }`}
+                                            }`}
                                         required
                                     >
                                         <option value="active">Aktív</option>
                                         <option value="inactive">Inaktív</option>
-                                        {/* Ha new poszt VAGY a poszt jóváhagyott, csak akkor jelenítsük meg a "Megoldva" opciót */}
+                                        // Megoldva opció csak új vagy jóváhagyott poszt esetén
                                         {(!isEditingPost || (currentPost && currentPost.elutasitva === "false")) && (
-                                        <option value="solved">Megoldva</option>
+                                            <option value="solved">Megoldva</option>
                                         )}
                                     </select>
                                 </div>
@@ -329,11 +320,10 @@ const MyPosts = () => {
                                 <div className="flex flex-col md:flex-row gap-3">
                                     <button
                                         type="submit"
-                                        className={`px-4 py-3 rounded-lg font-medium transition-colors ${
-                                            theme === 'dark' 
-                                                ? 'bg-[#1A73E8] hover:bg-[#1557B0] text-white' 
+                                        className={`px-4 py-3 rounded-lg font-medium transition-colors ${theme === 'dark'
+                                                ? 'bg-[#1A73E8] hover:bg-[#1557B0] text-white'
                                                 : 'bg-[#1A73E8] hover:bg-[#1557B0] text-white'
-                                        }`}
+                                            }`}
                                     >
                                         {isEditingPost ? 'Mentés' : 'Létrehozás'}
                                     </button>
@@ -351,11 +341,10 @@ const MyPosts = () => {
                                                 status: 'active'
                                             });
                                         }}
-                                        className={`px-4 py-3 rounded-lg font-medium transition-colors ${
-                                            theme === 'dark' 
-                                                ? 'bg-gray-600 hover:bg-gray-500 text-white' 
+                                        className={`px-4 py-3 rounded-lg font-medium transition-colors ${theme === 'dark'
+                                                ? 'bg-gray-600 hover:bg-gray-500 text-white'
                                                 : 'bg-gray-300 hover:bg-gray-400 text-gray-800'
-                                        }`}
+                                            }`}
                                     >
                                         Mégse
                                     </button>
@@ -368,15 +357,14 @@ const MyPosts = () => {
                         {posts.map((post) => (
                             <div
                                 key={post.id}
-                                className={`p-4 rounded-lg ${
-                                    post.status === 'solved' ? 
-                                        theme === 'dark' ? 'bg-green-900/30' : 'bg-green-50' : 
-                                    post.elutasitva === "true" ?
-                                        theme === 'dark' ? 'bg-red-900/30' : 'bg-red-50' :
-                                    post.elutasitva === "" ?
-                                        theme === 'dark' ? 'bg-yellow-900/30' : 'bg-yellow-50' :
-                                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
-                                }`}
+                                className={`p-4 rounded-lg ${post.status === 'solved' ?
+                                        theme === 'dark' ? 'bg-green-900/30' : 'bg-green-50' :
+                                        post.elutasitva === "true" ?
+                                            theme === 'dark' ? 'bg-red-900/30' : 'bg-red-50' :
+                                            post.elutasitva === "" ?
+                                                theme === 'dark' ? 'bg-yellow-900/30' : 'bg-yellow-50' :
+                                                theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'
+                                    }`}
                             >
                                 <div className="flex justify-between items-start mb-4">
                                     <h3 className={`text-lg font-semibold ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
@@ -385,27 +373,25 @@ const MyPosts = () => {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => handleEdit(post)}
-                                            className={`p-2 rounded-lg transition-colors ${
-                                                theme === 'dark' 
-                                                    ? 'text-blue-400 hover:bg-gray-600' 
+                                            className={`p-2 rounded-lg transition-colors ${theme === 'dark'
+                                                    ? 'text-blue-400 hover:bg-gray-600'
                                                     : 'text-blue-600 hover:bg-gray-200'
-                                            } ${(post.elutasitva === "" || post.elutasitva === "true") ? "opacity-50 cursor-not-allowed" : ""}`}
+                                                } ${(post.elutasitva === "" || post.elutasitva === "true") ? "opacity-50 cursor-not-allowed" : ""}`}
                                             disabled={post.elutasitva === "" || post.elutasitva === "true"}
                                             title={
                                                 post.elutasitva === "" ? "Jóváhagyásra váró poszt nem módosítható" :
-                                                post.elutasitva === "true" ? "Elutasított poszt nem módosítható" : 
-                                                "Poszt szerkesztése"
+                                                    post.elutasitva === "true" ? "Elutasított poszt nem módosítható" :
+                                                        "Poszt szerkesztése"
                                             }
                                         >
                                             <FaEdit className="w-4 h-4" />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(post.id)}
-                                            className={`p-2 rounded-lg transition-colors ${
-                                                theme === 'dark' 
-                                                    ? 'text-red-400 hover:bg-gray-600' 
+                                            className={`p-2 rounded-lg transition-colors ${theme === 'dark'
+                                                    ? 'text-red-400 hover:bg-gray-600'
                                                     : 'text-red-600 hover:bg-gray-200'
-                                            }`}
+                                                }`}
                                             title="Poszt törlése"
                                         >
                                             <FaTrash className="w-4 h-4" />
@@ -425,11 +411,11 @@ const MyPosts = () => {
                                     <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
                                         <span className="font-medium">Állapot:</span> {
                                             post.elutasitva === "" ? "Jóváhagyásra vár" :
-                                            post.elutasitva === "true" ? "Elutasítva" :
-                                            post.elutasitva === "false" ? "Aktív" :
-                                            post.status === 'active' ? 'Aktív' :
-                                            post.status === 'inactive' ? 'Inaktív' :
-                                            post.status === 'solved' ? 'Megoldva' : 'Jóváhagyásra vár'
+                                                post.elutasitva === "true" ? "Elutasítva" :
+                                                    post.elutasitva === "false" ? "Aktív" :
+                                                        post.status === 'active' ? 'Aktív' :
+                                                            post.status === 'inactive' ? 'Inaktív' :
+                                                                post.status === 'solved' ? 'Megoldva' : 'Jóváhagyásra vár'
                                         }
                                     </p>
                                 </div>

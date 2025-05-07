@@ -2,13 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Görgetősáv eltüntetése */
-body::-webkit-scrollbar {
+/* Görgetősáv elrejtése minden elemen */
+*::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
 
-body {
-  -ms-overflow-style: none;  /* IE és Edge */
-  scrollbar-width: none;  /* Firefox */
-  overflow: auto; /* Tartalom görgethető marad */
+* {
+  -ms-overflow-style: none; /* IE és Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Tartalom görgethető marad */
+html, body {
+  overflow-y: auto;
+}
+
+/* Modal nyitásakor a body nem görgethető */
+body.modal-open {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
+/* Modal tartalma görgethető marad */
+.ReactModal__Content {
+  overflow-y: auto !important;
+  max-height: 80vh !important;
 }

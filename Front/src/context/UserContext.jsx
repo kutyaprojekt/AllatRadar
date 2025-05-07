@@ -7,7 +7,7 @@ export const UserProvider = ({ children }) => {
     const [hasRejectedPosts, setHasRejectedPosts] = useState(false);
     const token = localStorage.getItem('usertoken');
 
-    // Lekérem a felhasználót
+    // Felhasználó adatok lekérése
     const getCurrentUser = async (token) => {
         const response = await fetch('http://localhost:8000/felhasznalok/me', {
             method: 'GET',
@@ -17,10 +17,10 @@ export const UserProvider = ({ children }) => {
             }
         });
         const data = await response.json();
-        setUser(data); // Frissíti a felhasználói adatokat
+        setUser(data);
     };
 
-    // Ellenőrizzük az elutasított posztokat
+    // Elutasított posztok ellenőrzése
     const checkRejectedPosts = async () => {
         try {
             const response = await fetch('http://localhost:8000/felhasznalok/rejected-posts', {
@@ -33,25 +33,24 @@ export const UserProvider = ({ children }) => {
             const data = await response.json();
             setHasRejectedPosts(data.length > 0);
         } catch (error) {
-            console.error("Hiba az elutasított posztok ellenőrzése során:", error);
+            // Hiba az elutasított posztok ellenőrzése során
         }
     };
 
-    // Mindig lefut, amikor betölt a komponens
-    // Oldal reload esetén is le fog futni
+    // Komponens betöltéskor és állapotváltozáskor
     useEffect(() => {
         if (token) {
             getCurrentUser(token);
             checkRejectedPosts();
         }
-    }, [refresh]); // A refresh változására is reagál
+    }, [refresh]);
 
     return (
         <UserContext.Provider value={{
             refresh,
             SetRefresh,
             user,
-            setUser, // Hozzáadva a setUser függvény
+            setUser,
             getCurrentUser,
             hasRejectedPosts,
             setHasRejectedPosts,

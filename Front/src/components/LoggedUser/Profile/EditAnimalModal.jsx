@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { FaTimes, FaImage, FaCalendarAlt } from 'react-icons/fa';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "../../../styles/datepicker.css"; // Importáljuk a Tailwind-alapú datepicker stílusokat
+import "../../../styles/datepicker.css"; // Tailwind-alapú datepicker stílusok
+import UserContext from '../../../context/UserContext';
 
 const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
+    const { SetRefresh } = useContext(UserContext);
     const [formData, setFormData] = useState({
         allatfaj: animal.allatfaj || '',
         kategoria: animal.kategoria || '',
@@ -23,7 +25,7 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
     const [newImage, setNewImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(animal.filePath ? `http://localhost:8000/${animal.filePath}` : (animal.kep ? `http://localhost:8000/images/${animal.kep}` : null));
 
-    // Dátum formázása
+    // Dátum formázás
     const formatDate = (dateString) => {
         if (!dateString) return "Ismeretlen dátum";
         const date = new Date(dateString);
@@ -31,7 +33,7 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
         return date.toLocaleDateString('hu-HU');
     };
 
-    // Egyedi input a DatePicker komponenshez
+    // DatePicker egyedi input
     const CustomInput = React.forwardRef(({ value, onClick }, ref) => (
         <div className="relative w-full">
             <FaCalendarAlt className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "text-gray-400" : "text-blue-500"} text-lg z-10`} />
@@ -46,7 +48,7 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
         </div>
     ));
 
-    // Dátum változás kezelése
+    // Dátum változás kezelés
     const handleDateChange = (date) => {
         const finalDate = date || new Date();
         setSelectedDate(finalDate);
@@ -69,7 +71,7 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
             const file = e.target.files[0];
             setNewImage(file);
             
-            // Előnézet beállítása
+            // Előnézet beállítás
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result);
@@ -93,7 +95,7 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                 }
             });
             
-            // Kép hozzáadása, ha van új kép
+            // Új kép hozzáadása
             if (newImage) {
                 formDataToSend.append('kep', newImage);
             }
@@ -112,40 +114,64 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                 throw new Error(data.error || 'Hiba történt a poszt frissítése során');
             }
             
-            // ELŐSZÖR frissítünk
-            // Bezárjuk a modalt
+            // Sikerüzenet megjelenítése
+            toast.success(data.message || 'Poszt sikeresen frissítve!', {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true
+            });
+            
+            // Modal bezárása
             onClose();
             
-            // Adjuk át a frissített adatokat az onUpdate függvénynek
+            // Frissített adatok átadása
             if (typeof onUpdate === 'function') {
-                console.log("Átadom a frissített adatokat:", data.animal);
                 onUpdate(data.animal);
             }
             
-            // UTÁNA jelenítjük meg a toast üzenetet
+            // UserContext frissítése, hogy az alkalmazás minden része értesüljön a változásról
             setTimeout(() => {
-                toast.success(data.message || 'Poszt sikeresen frissítve!');
-            }, 300);
+                SetRefresh(prev => !prev);
+            }, 100);
             
         } catch (error) {
-            toast.error(error.message);
+            toast.error(error.message, {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true
+            });
             setIsLoading(false);
         }
     };
 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
-            <ToastContainer className="z-50" />
+            <ToastContainer 
+                position="top-right"
+                autoClose={2500}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss={false}
+                pauseOnHover={false}
+                draggable
+                theme={theme === "dark" ? "dark" : "light"}
+                className="z-50"
+            />
             <div className="flex items-center justify-center min-h-screen px-4 py-6">
-                {/* Háttér overlay */}
                 <div 
                     className="fixed inset-0 bg-black bg-opacity-40"
                     onClick={onClose}
                 />
                 
-                {/* Modal tartalom */}
                 <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl mx-auto p-0 z-50 overflow-hidden border border-gray-200 dark:border-gray-700 max-h-[90vh] flex flex-col">
-                    {/* Fejléc */}
                     <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
                         <h2 className="text-2xl font-bold text-[#1A73E8] dark:text-blue-300">Poszt szerkesztése</h2>
                         <button 
@@ -156,9 +182,7 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                         </button>
                     </div>
 
-                    {/* Tartalom */}
                     <div className="flex flex-col md:flex-row gap-6 px-8 py-6 bg-white dark:bg-gray-800 overflow-y-auto">
-                        {/* Bal oldal: kép szerkesztés */}
                         <div className="md:w-2/5 w-full flex flex-col items-center">
                             <div className="w-full h-72 rounded-2xl overflow-hidden shadow-lg border-2 border-blue-200 dark:border-blue-900 bg-gray-50 dark:bg-gray-900 flex items-center justify-center mb-4 relative group">
                                 {imagePreview ? (
@@ -171,7 +195,6 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                                     <span className="text-3xl font-bold text-gray-400 dark:text-gray-600">KÉP</span>
                                 )}
                                 
-                                {/* Kép feltöltés overlay */}
                                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
                                     <label className="cursor-pointer bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                                         <FaImage className="h-6 w-6 text-blue-500" />
@@ -189,7 +212,6 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                                 <span className="text-lg font-bold text-[#073F48] dark:text-white mb-1">{formData.allatfaj}</span>
                                 <span className="text-sm text-gray-500 dark:text-gray-400">{formData.kategoria}</span>
                                 
-                                {/* Kép feltöltési gomb */}
                                 <label className="mt-3 cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                                     <FaImage />
                                     Kép módosítása
@@ -208,7 +230,6 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                             </div>
                         </div>
                         
-                        {/* Jobb oldal: mezők */}
                         <div className="md:w-3/5 w-full flex flex-col gap-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -312,7 +333,6 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                         </div>
                     </div>
 
-                    {/* Láb */}
                     <div className="flex justify-end gap-3 px-8 py-6 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
                         <button
                             onClick={onClose}

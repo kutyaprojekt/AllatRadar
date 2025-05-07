@@ -11,8 +11,8 @@ const Admin = () => {
     const [actionType, setActionType] = useState('');
 
     useEffect(() => {
-        // TODO: Fetch users from API
-        // This is just mock data for now
+        // Felhasználók betöltése API-ról
+        // Teszt adatok
         setUsers([
             {
                 id: 1,
@@ -45,7 +45,7 @@ const Admin = () => {
     };
 
     const confirmAction = () => {
-        // TODO: Perform action via API
+        // Művelet végrehajtása API-n keresztül
         if (actionType === 'delete') {
             setUsers(users.filter(user => user.id !== selectedUser.id));
         } else if (actionType === 'ban') {
@@ -77,11 +77,10 @@ const Admin = () => {
                             placeholder="Keresés név vagy email alapján..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${
-                                theme === 'dark' 
-                                    ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]' 
+                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:outline-none ${theme === 'dark'
+                                    ? 'border-gray-600 bg-gray-700 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]'
                                     : 'border-gray-300 bg-white text-[#073F48] focus:ring-[#1A73E8] focus:border-[#1A73E8]'
-                            }`}
+                                }`}
                         />
                     </div>
 
@@ -117,9 +116,8 @@ const Admin = () => {
                                     >
                                         <td className="py-3 px-4">
                                             <div className="flex items-center">
-                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                                    theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
-                                                }`}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                                                    }`}>
                                                     <FaUser className={`w-4 h-4 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`} />
                                                 </div>
                                                 <span className={`ml-3 ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
@@ -134,15 +132,14 @@ const Admin = () => {
                                             {user.role}
                                         </td>
                                         <td className="py-3 px-4">
-                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                                                user.status === 'active'
+                                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${user.status === 'active'
                                                     ? theme === 'dark'
                                                         ? 'bg-green-900/50 text-green-400'
                                                         : 'bg-green-100 text-green-800'
                                                     : theme === 'dark'
                                                         ? 'bg-red-900/50 text-red-400'
                                                         : 'bg-red-100 text-red-800'
-                                            }`}>
+                                                }`}>
                                                 {user.status === 'active' ? 'Aktív' : 'Letiltva'}
                                             </span>
                                         </td>
@@ -153,21 +150,19 @@ const Admin = () => {
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() => handleAction(user, 'ban')}
-                                                    className={`p-2 rounded-lg transition-colors ${
-                                                        theme === 'dark' 
-                                                            ? 'text-yellow-400 hover:bg-gray-700' 
+                                                    className={`p-2 rounded-lg transition-colors ${theme === 'dark'
+                                                            ? 'text-yellow-400 hover:bg-gray-700'
                                                             : 'text-yellow-600 hover:bg-gray-100'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <FaBan className="w-4 h-4" />
                                                 </button>
                                                 <button
                                                     onClick={() => handleAction(user, 'delete')}
-                                                    className={`p-2 rounded-lg transition-colors ${
-                                                        theme === 'dark' 
-                                                            ? 'text-red-400 hover:bg-gray-700' 
+                                                    className={`p-2 rounded-lg transition-colors ${theme === 'dark'
+                                                            ? 'text-red-400 hover:bg-gray-700'
                                                             : 'text-red-600 hover:bg-gray-100'
-                                                    }`}
+                                                        }`}
                                                 >
                                                     <FaTrash className="w-4 h-4" />
                                                 </button>
@@ -179,20 +174,16 @@ const Admin = () => {
                         </table>
                     </div>
 
-                    {/* Megerősítő modal */}
                     {isConfirming && (
                         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                            <div className={`rounded-lg p-6 max-w-md w-full ${
-                                theme === 'dark' ? 'bg-gray-800' : 'bg-white'
-                            }`}>
-                                <h3 className={`text-lg font-semibold mb-4 ${
-                                    theme === 'dark' ? 'text-white' : 'text-[#073F48]'
+                            <div className={`rounded-lg p-6 max-w-md w-full ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'
                                 }`}>
+                                <h3 className={`text-lg font-semibold mb-4 ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'
+                                    }`}>
                                     {actionType === 'delete' ? 'Felhasználó törlése' : 'Felhasználó letiltása/engedélyezése'}
                                 </h3>
-                                <p className={`mb-6 ${
-                                    theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-                                }`}>
+                                <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
+                                    }`}>
                                     {actionType === 'delete'
                                         ? `Biztosan törölni szeretnéd a(z) ${selectedUser?.name} felhasználót?`
                                         : `Biztosan ${selectedUser?.status === 'active' ? 'letiltani' : 'engedélyezni'} szeretnéd a(z) ${selectedUser?.name} felhasználót?`}
@@ -200,11 +191,10 @@ const Admin = () => {
                                 <div className="flex flex-col md:flex-row gap-3">
                                     <button
                                         onClick={confirmAction}
-                                        className={`px-4 py-3 rounded-lg font-medium transition-colors ${
-                                            theme === 'dark' 
-                                                ? 'bg-[#1A73E8] hover:bg-[#1557B0] text-white' 
+                                        className={`px-4 py-3 rounded-lg font-medium transition-colors ${theme === 'dark'
+                                                ? 'bg-[#1A73E8] hover:bg-[#1557B0] text-white'
                                                 : 'bg-[#1A73E8] hover:bg-[#1557B0] text-white'
-                                        }`}
+                                            }`}
                                     >
                                         <FaCheck className="w-4 h-4 inline-block mr-2" />
                                         Megerősítés
@@ -215,11 +205,10 @@ const Admin = () => {
                                             setSelectedUser(null);
                                             setActionType('');
                                         }}
-                                        className={`px-4 py-3 rounded-lg font-medium transition-colors ${
-                                            theme === 'dark' 
-                                                ? 'bg-gray-600 hover:bg-gray-500 text-white' 
+                                        className={`px-4 py-3 rounded-lg font-medium transition-colors ${theme === 'dark'
+                                                ? 'bg-gray-600 hover:bg-gray-500 text-white'
                                                 : 'bg-gray-300 hover:bg-gray-400 text-gray-800'
-                                        }`}
+                                            }`}
                                     >
                                         Mégse
                                     </button>

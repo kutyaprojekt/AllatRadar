@@ -8,12 +8,12 @@ const Profilom = () => {
   const { user } = useContext(UserContext);
   const { theme } = useTheme();
 
-  // Scroll to top when component mounts
+  // Oldal tetejére görgetés
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Ha nincs bejelentkezett felhasználó, átirányítjuk a bejelentkezési oldalra
+  // Bejelentkezés ellenőrzés
   if (!user) {
     return <Navigate to="/login" replace />;
   }

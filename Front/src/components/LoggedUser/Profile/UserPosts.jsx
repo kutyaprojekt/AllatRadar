@@ -17,18 +17,18 @@ const UserPosts = () => {
     const { theme } = useTheme();
     const token = localStorage.getItem("usertoken");
     const { refresh, SetRefresh } = useContext(UserContext);
-    
+
     const [activeTab, setActiveTab] = useState('');
     const [isAdmin, setIsAdmin] = useState(false);
-    
-    // Scroll to top when component mounts
+
+    // Oldal tetejére görgetés
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-    
+
     const adminornot = async () => {
         try {
-            // Felhasználó adatainak lekérése
+            // Felhasználó adatok lekérése
             const userResponse = await fetch("http://localhost:8000/felhasznalok/me", {
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -37,12 +37,12 @@ const UserPosts = () => {
             const userData = await userResponse.json();
             setUser(userData);
 
-            if(userData.admin == "true") {
+            if (userData.admin == "true") {
                 setIsAdmin(true);
             }
 
         } catch (error) {
-            console.error("Hiba a felhasználó adatok lekérésekor:", error);
+            toast.error("Felhasználó adatok lekérése sikertelen");
         }
     };
 
@@ -54,22 +54,58 @@ const UserPosts = () => {
                     "Authorization": `Bearer ${token}`,
                 },
             });
-            
+
+            // Ha a válasz 404 vagy 204, az azt jelenti, hogy nincsenek posztok
+            if (response.status === 404 || response.status === 204) {
+                setAnimals([]);
+                return;
+            }
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
             const data = await response.json();
-            // Sort by date, newest first
-            const sortedAnimals = Array.isArray(data) 
+            
+            // Üres tömb vagy null/undefined esetén ne jelezzen hibát
+            if (!data || (Array.isArray(data) && data.length === 0)) {
+                setAnimals([]);
+                return;
+            }
+            
+            // Dátum szerinti rendezés, legfrissebb elöl
+            const sortedAnimals = Array.isArray(data)
                 ? data.sort((a, b) => new Date(b.datum) - new Date(a.datum))
                 : [];
             setAnimals(sortedAnimals);
         } catch (error) {
-            console.error("Hiba történt az API hívás során:", error);
+            // Csak valódi hibát jelezzen, ne az üres választ
+            toast.error("Adatok betöltése sikertelen");
             setAnimals([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Elutasított és egyéb státusszal rendelkező bejegyzések lekérése
+    const checkRejectedPosts = async () => {
+        if (!token || !isAdmin) return;
+        
+        try {
+            const response = await fetch('http://localhost:8000/felhasznalok/rejected-posts', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            if (response.ok) {
+                // Sikeresen lekértük az elutasított posztokat, frissítsük az állatok listáját is
+                await loadAnimals();
+            }
+        } catch (error) {
+            // Hiba kezelése szükség esetén
         }
     };
 
@@ -78,17 +114,22 @@ const UserPosts = () => {
             await adminornot();
             await loadAnimals();
         };
-        
+
         fetchData();
+        
+        // Beállítunk egy intervallumot a frissítéshez
+        const interval = setInterval(() => {
+            checkRejectedPosts();
+        }, 5000); // 5 másodpercenként ellenőrizzük az elutasított posztokat
+        
+        return () => clearInterval(interval);
     }, [refresh]);
 
     const handlePostUpdate = async () => {
-        console.log("Frissítés kérve a UserPosts komponensben");
-        
-        // Közvetlenül töltjük újra az állatokat
+        // Állatok újratöltése
         await loadAnimals();
-        
-        // Majd frissítjük a kontextust is a teljes alkalmazás frissítéséhez
+
+        // Kontextus frissítése
         SetRefresh(prev => !prev);
     };
 
@@ -114,13 +155,25 @@ const UserPosts = () => {
 
     return (
         <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]"}`}>
-            <ToastContainer className="z-50" />
+            <ToastContainer 
+                position="top-right"
+                autoClose={2500}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss={false}
+                pauseOnHover={false}
+                draggable
+                theme={theme === "dark" ? "dark" : "light"}
+                className="z-50"
+            />
             <div className="container mx-auto px-4 pt-24 pb-12 flex flex-col md:flex-row gap-8">
-                {/* SideBarMenu komponens használata */}
-                <SideBarMenu 
-                    activeTab={activeTab} 
-                    setActiveTab={setActiveTab} 
-                    isAdmin={isAdmin} 
+                {/* Oldalsáv menü */}
+                <SideBarMenu
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    isAdmin={isAdmin}
                 />
 
                 {/* Fő tartalom */}
@@ -133,11 +186,10 @@ const UserPosts = () => {
                             <select
                                 value={filter}
                                 onChange={(e) => setFilter(e.target.value)}
-                                className={`px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-                                    theme === 'dark' 
-                                        ? 'bg-gray-700 text-white border-gray-600 focus:ring-[#1A73E8] focus:border-[#1A73E8]' 
+                                className={`px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${theme === 'dark'
+                                        ? 'bg-gray-700 text-white border-gray-600 focus:ring-[#1A73E8] focus:border-[#1A73E8]'
                                         : 'bg-white text-[#073F48] border-gray-300 focus:ring-[#1A73E8] focus:border-[#1A73E8]'
-                                }`}
+                                    }`}
                             >
                                 <option value="all">Összes</option>
                                 <option value="searching">Keresés alatt</option>
@@ -145,13 +197,12 @@ const UserPosts = () => {
                                 <option value="rejected">Elutasítottak</option>
                                 <option value="pending">Jóváhagyásra várók</option>
                             </select>
-                            <Link 
-                                to="/elveszettallat" 
-                                className={`flex items-center px-5 py-2.5 rounded-lg font-medium transition-colors ${
-                                    theme === 'dark' 
-                                        ? 'bg-[#1A73E8] hover:bg-[#1557B0] text-white' 
+                            <Link
+                                to="/elveszettallat"
+                                className={`flex items-center px-5 py-2.5 rounded-lg font-medium transition-colors ${theme === 'dark'
+                                        ? 'bg-[#1A73E8] hover:bg-[#1557B0] text-white'
                                         : 'bg-[#1A73E8] hover:bg-[#1557B0] text-white'
-                                }`}
+                                    }`}
                             >
                                 <FaPlus className="mr-2" />
                                 Új poszt
@@ -162,8 +213,8 @@ const UserPosts = () => {
                     {filteredAnimals.length === 0 ? (
                         <div className={`text-center py-16 ${theme === "dark" ? "text-gray-300" : "text-[#073F48]"}`}>
                             <p className="text-xl mb-6">Nincs megjeleníthető poszt.</p>
-                            <Link 
-                                to="/elveszettallat" 
+                            <Link
+                                to="/elveszettallat"
                                 className={`inline-block px-8 py-3 rounded-lg font-medium text-white bg-[#1A73E8] hover:bg-[#1557B0] transition-colors`}
                             >
                                 Új poszt létrehozása

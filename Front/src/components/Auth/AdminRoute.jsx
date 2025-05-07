@@ -8,25 +8,25 @@ const AdminRoute = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const location = useLocation();
   const { theme } = useTheme();
-  
-  // Dinamikus osztályok a témához
+
+  // Téma osztályok meghatározása
   const isDarkMode = theme === 'dark';
   const bgClass = isDarkMode ? 'bg-gray-900' : 'bg-gray-50';
   const cardClass = isDarkMode ? 'bg-gray-800' : 'bg-white';
   const textClass = isDarkMode ? 'text-white' : 'text-gray-900';
   const subTextClass = isDarkMode ? 'text-gray-300' : 'text-gray-600';
-  
+
   useEffect(() => {
     const checkAdminStatus = async () => {
       const token = localStorage.getItem('usertoken');
-      
-      // Ha nincs token, nem admin
+
+      // Token ellenőrzés
       if (!token) {
         setIsAdmin(false);
         setLoading(false);
         return;
       }
-      
+
       try {
         const response = await fetch('http://localhost:8000/felhasznalok/me', {
           method: 'GET',
@@ -35,16 +35,16 @@ const AdminRoute = ({ children }) => {
             'Content-Type': 'application/json'
           }
         });
-        
+
         if (!response.ok) {
           throw new Error('Nem sikerült lekérni a felhasználói adatokat');
         }
-        
+
         const userData = await response.json();
         const adminStatus = userData.admin === "true";
-        
+
         setIsAdmin(adminStatus);
-        
+
         if (!adminStatus) {
           toast.error('Ez az oldal csak adminisztrátorok számára elérhető!', {
             position: 'top-center',
@@ -52,18 +52,18 @@ const AdminRoute = ({ children }) => {
           });
         }
       } catch (error) {
-        console.error('Hiba a jogosultság ellenőrzése során:', error);
+        // Hibakezelés
         setIsAdmin(false);
       } finally {
         setLoading(false);
       }
     };
-    
+
     checkAdminStatus();
   }, []);
-  
+
   if (loading) {
-    // Betöltés alatt egy egyszerű betöltési jelzés
+    // Betöltés állapot
     return (
       <div className={`min-h-screen flex items-center justify-center ${bgClass}`}>
         <div className={`text-center p-8 rounded-lg shadow-lg ${cardClass}`}>
@@ -79,10 +79,9 @@ const AdminRoute = ({ children }) => {
       </div>
     );
   }
-  
-  // Ha nem admin, átirányítjuk a főoldalra
+
+  // Nem admin esetén átirányítás
   if (!isAdmin) {
-    // Hiba jelzése
     toast.error('Ez az oldal csak adminisztrátorok számára elérhető!', {
       position: 'top-center',
       autoClose: 2500,
@@ -91,8 +90,7 @@ const AdminRoute = ({ children }) => {
       pauseOnHover: true,
       draggable: true,
     });
-    
-    // Átirányítás késleltetéssel, hogy a felhasználó láthassa a toast üzenetet
+
     return (
       <div className={`min-h-screen flex items-center justify-center ${bgClass}`}>
         <div className={`text-center p-8 rounded-lg shadow-lg ${cardClass} max-w-md`}>
@@ -104,14 +102,14 @@ const AdminRoute = ({ children }) => {
           <h2 className={`text-xl font-semibold ${textClass} mb-2`}>Hozzáférés megtagadva</h2>
           <p className={`text-gray-600 ${subTextClass} mb-6`}>Ez az oldal csak adminisztrátori jogosultsággal rendelkező felhasználók számára elérhető.</p>
           <p className={`text-sm ${subTextClass}`}>Átirányítás a kezdőlapra...</p>
-          
+
           <Navigate to="/" state={{ from: location }} replace />
         </div>
       </div>
     );
   }
-  
-  // Ha admin, megjelenítjük a védett tartalmat
+
+  // Admin tartalom megjelenítése
   return children;
 };
 

@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useTheme } from "../../../context/ThemeContext";
 import { FaPaw, FaCalendarAlt, FaMapMarkerAlt, FaInfoCircle, FaRuler } from "react-icons/fa";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import ConfirmationModal from './ComfirmationModal'; // Megerősítő komponens
-import EditAnimalModal from './EditAnimalModal'; // Edit komponens importálása
+import ConfirmationModal from './ComfirmationModal'; // Megerősítés modal
+import EditAnimalModal from './EditAnimalModal'; // Szerkesztő modal
+import UserContext from '../../../context/UserContext';
 
 const UserPostsTemplate = ({animal, onUpdate}) => {
     const { theme } = useTheme();
+    const { SetRefresh } = useContext(UserContext);
     const [isLoading, setIsLoading] = useState(false);
-    const [showConfirmation, setShowConfirmation] = useState(false); // Állapot a megerősítő ablakhoz
-    const [showEditModal, setShowEditModal] = useState(false); // Állapot a szerkesztő ablakhoz
+    const [showConfirmation, setShowConfirmation] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
     const [visszajelzes, setVisszajelzes] = useState("");
 
     const updatelosttofound = async () => {
@@ -32,48 +34,66 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                 throw new Error(data.error || "Hiba történt a frissítés során");
             }
 
-            // Először frissítünk
-            if (onUpdate) {
-                onUpdate();
-            }
-            
-            // Azután bezárjuk a modalt
+            // Modal bezárása
             setShowConfirmation(false);
             setIsLoading(false);
             
-            // Végül megjelenítjük a toast üzenetet
+            // Sikeres értesítés
+            toast.success("Állat sikeresen megjelölve megtaláltként!", {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true
+            });
+            
+            // Késleltetett frissítés, hogy a toast látható legyen
             setTimeout(() => {
-                toast.success("Állat sikeresen megjelölve megtaláltként!");
-            }, 300);
+                // Adatok frissítése
+                if (onUpdate) {
+                    onUpdate();
+                }
+                
+                // UserContext frissítése
+                SetRefresh(prev => !prev);
+            }, 100);
         } catch (error) {
-            toast.error(error.message);
+            toast.error(error.message, {
+                position: "top-right",
+                autoClose: 2500,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: true
+            });
             setIsLoading(false);
             setShowConfirmation(false);
         }
     };
 
     const handleConfirm = () => {
-        setShowConfirmation(true); // Megjelenítjük a megerősítő ablakot
+        setShowConfirmation(true);
     };
 
     const handleEdit = () => {
-        setShowEditModal(true); // Szerkesztő ablak megjelenítése
+        setShowEditModal(true);
     };
 
     const handleEditComplete = (updatedAnimal) => {
-        // Ha van frissített állat adat, frissítse a komponenst
-        console.log("Frissítés meghívva:", updatedAnimal);
+        // Modal bezárása
+        setShowEditModal(false);
         
-        // Először frissítjük az adatokat
-        if (typeof onUpdate === 'function') {
-            // Az onUpdate függvény használatával azonnal értesítsük a szülő komponenst a változásról
-            onUpdate();
-        }
-        
-        // Azután zárjuk be a modalt
+        // Késleltetett frissítés, hogy a toast látható legyen
         setTimeout(() => {
-            setShowEditModal(false);
-        }, 50);
+            // Adatok frissítése
+            if (typeof onUpdate === 'function') {
+                onUpdate();
+            }
+            
+            // UserContext frissítése
+            SetRefresh(prev => !prev);
+        }, 100);
     };
 
     return (
@@ -143,7 +163,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                     )}
                 </div>
 
-                {/* Gombok */}
+                {/* Funkciógombok */}
                 <div className="flex flex-col gap-2 mt-4">
                     {animal.visszakerult_e !== "true" && (
                         <button 
@@ -172,9 +192,8 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                     )}
                 </div>
             </div>
-            <ToastContainer className="z-50" />
 
-            {/* Megerősítő ablak */}
+            {/* Megerősítő modal */}
             {showConfirmation && (
                 <ConfirmationModal
                     title="Biztos, hogy megtaláltad?"
@@ -187,7 +206,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                 />
             )}
 
-            {/* Szerkesztő ablak */}
+            {/* Szerkesztő modal */}
             {showEditModal && (
                 <EditAnimalModal
                     animal={animal}

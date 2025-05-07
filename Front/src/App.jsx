@@ -25,7 +25,7 @@ import ContactUs from "./components/Assets/FooterComponents/ContactUs";
 import UserMessages from "./components/LoggedUser/Profile/UserMessages";
 import AdminRoute from "./components/Auth/AdminRoute";
 
-// Fő App komponens, ami tartalmazza az útválasztást és a kontextus providereket
+// Alkalmazás fő komponense útválasztással
 function App() {
   return (
     <>

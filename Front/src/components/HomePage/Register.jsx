@@ -32,14 +32,14 @@ const Register = () => {
   const writeData = (e) => {
     const { id, value } = e.target;
 
-    // Telefonszám validáció: csak számok és opcionálisan + jel az elején
+    // Telefonszám validáció
     if (id === "phonenumber") {
-      // Új regex: elfogad egy opcionális + jelet az elején, utána csak számokat
+      // Opcionális + jel elején, utána csak számok
       if (!/^(\+?\d*)$/.test(value)) {
-        return; // Ha nem felel meg a szabálynak, nem frissítjük
+        return;
       }
       if (value.length > 15) {
-        return; // Ha több mint 15 karakter, nem frissítjük
+        return;
       }
     }
 
@@ -50,20 +50,20 @@ const Register = () => {
   };
 
   const reguser = async () => {
-    // Email formátum ellenőrzése
+    // Email formátum ellenőrzés
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(formState.email)) {
       toast.error("Érvénytelen email formátum!");
       return;
     }
 
-    // Telefonszám ellenőrzése (+ jel és számjegyek)
+    // Telefonszám formátum ellenőrzés
     if (!/^(\+?\d+)$/.test(formState.phonenumber)) {
       toast.error("A telefonszám csak számokat és + előjelet tartalmazhat!");
       return;
     }
 
-    // Telefonszám hossz ellenőrzése
+    // Telefonszám hossz ellenőrzés
     if (formState.phonenumber.length > 15) {
       toast.error("A telefonszám nem lehet hosszabb 15 karakternél!");
       return;
@@ -79,9 +79,9 @@ const Register = () => {
       });
 
       const data = await response.json();
-      
+
       if (data.message === "Sikeres regisztráció!" || data.success) {
-        // Sikeres toast üzenet és időzített átirányítás
+        // Sikeres regisztráció és átirányítás
         toast.success("Sikeres regisztráció!", {
           position: "top-right",
           autoClose: 1500,
@@ -206,7 +206,7 @@ const Register = () => {
             >
               Regisztráció
             </button>
-            <ToastContainer 
+            <ToastContainer
               position="top-right"
               autoClose={1500}
               hideProgressBar={false}

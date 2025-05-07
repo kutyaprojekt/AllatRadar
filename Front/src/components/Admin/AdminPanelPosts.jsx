@@ -4,10 +4,9 @@ import { useTheme } from "../../context/ThemeContext";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Modal from 'react-modal';
-import { FaInfoCircle, FaCheck, FaTrash, FaTimes, FaCommentDots, FaPaw, FaSearch, FaUserShield, FaFilter } from 'react-icons/fa';
+import { FaInfoCircle, FaCheck, FaTrash, FaTimes, FaCommentDots, FaPaw, FaSearch, FaUserShield } from 'react-icons/fa';
 import SideBarMenu from '../Assets/SidebarMenu/SideBarMenu';
 import AnimalDetailsModal from '../Animals/AnimalDetailsModal';
-import AdminPanelPostsTemplate from './AdminPanelPostsTemplate';
 
 Modal.setAppElement('#root');
 
@@ -25,9 +24,9 @@ const AdminPanelPosts = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [animalToDelete, setAnimalToDelete] = useState(null);
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-    
+
     const token = localStorage.getItem("usertoken");
-    const { user } = useContext(UserContext);
+    const { user, SetRefresh } = useContext(UserContext);
     const { theme } = useTheme();
     const isAdmin = user?.admin === "true";
 
@@ -43,7 +42,7 @@ const AdminPanelPosts = () => {
         };
     }, []);
 
-    // Predefined rejection reasons
+    // Elutasítási okok
     const predefinedReasons = [
         "Érvénytelen állatfaj",
         "Érvénytelen állatkategória",
@@ -68,11 +67,9 @@ const AdminPanelPosts = () => {
             if (!response.ok) throw new Error("Hiba történt az adatok lekérése során");
 
             const data = await response.json();
-            // Sort by date, newest first
             const sortedAnimals = (data.animals || []).sort((a, b) => new Date(b.datum) - new Date(a.datum));
             setAdatok(sortedAnimals);
         } catch (error) {
-            console.error("Hiba történt az adatok lekérése során:", error);
             setAdatok([]);
         }
     };
@@ -116,9 +113,8 @@ const AdminPanelPosts = () => {
             }
 
             toast.success('Poszt sikeresen jóváhagyva!');
-            loadAdatok(); // Frissítjük a posztok listáját
+            loadAdatok();
         } catch (error) {
-            console.error('Hiba:', error);
             toast.error(error.message || 'Hiba történt a jóváhagyás során');
         }
     };
@@ -159,7 +155,9 @@ const AdminPanelPosts = () => {
                     });
                 }
 
-                loadAdatok();
+                await loadAdatok();
+                SetRefresh(prev => !prev);
+                
                 toast.success("Poszt sikeresen elutasítva!");
                 setRejectionReason('');
                 setCustomMessage('');
@@ -169,11 +167,11 @@ const AdminPanelPosts = () => {
                 toast.error("Hiba történt az elutasítás során: " + errorText);
             }
         } catch (error) {
-            console.error("Hiba történt az elutasítás során:", error);
             toast.error("Hiba történt az elutasítás során: " + error.message);
         }
     };
 
+    // Szűrt állatok
     const filteredAnimals = adatok.filter(animal => {
         const matchesSearch = animal.allatfaj.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -184,6 +182,7 @@ const AdminPanelPosts = () => {
         return false;
     });
 
+    // Részletek modal
     const openModal = (animal) => {
         setSelectedAnimal(animal);
         setModalIsOpen(true);
@@ -193,6 +192,7 @@ const AdminPanelPosts = () => {
         setModalIsOpen(false);
     };
 
+    // Törlés modal
     const openDeleteModal = (animal) => {
         setAnimalToDelete(animal);
         setShowDeleteModal(true);
@@ -203,6 +203,7 @@ const AdminPanelPosts = () => {
         setAnimalToDelete(null);
     };
 
+    // Adatok betöltése a szűrők változásakor
     useEffect(() => {
         loadAdatok();
         window.scrollTo(0, 0);
@@ -210,15 +211,24 @@ const AdminPanelPosts = () => {
 
     return (
         <div className={`min-h-screen ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
+            <ToastContainer 
+                position="top-right"
+                autoClose={2500}
+                hideProgressBar={false}
+                newestOnTop={true}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                className="z-50"
+            />
             <div className="container mx-auto px-4 pt-24 pb-12 flex flex-col md:flex-row gap-8">
-                {/* Oldalsó menü */}
-                <SideBarMenu 
-                    activeTab={activeTab} 
-                    setActiveTab={setActiveTab} 
-                    isAdmin={isAdmin} 
+                <SideBarMenu
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    isAdmin={isAdmin}
                 />
-
-                {/* Fő tartalom */}
                 <div className={`flex-1 ${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-lg p-6 md:p-8`}>
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
                         <h2 className={`text-2xl font-bold flex items-center ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'} mb-4 md:mb-0`}>
@@ -227,7 +237,6 @@ const AdminPanelPosts = () => {
                         </h2>
 
                         <div className="flex flex-col md:flex-row gap-4">
-                            {/* Keresés mező */}
                             <div className="relative w-full md:w-64">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <FaSearch className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
@@ -235,25 +244,23 @@ const AdminPanelPosts = () => {
                                 <input
                                     type="text"
                                     placeholder="Keresés..."
-                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:outline-none ${
-                                        theme === 'dark' 
-                                            ? 'bg-gray-700 text-white border-gray-600 focus:ring-[#1A73E8] focus:border-[#1A73E8]' 
+                                    className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:outline-none ${theme === 'dark'
+                                            ? 'bg-gray-700 text-white border-gray-600 focus:ring-[#1A73E8] focus:border-[#1A73E8]'
                                             : 'bg-white text-[#073F48] border-gray-300 focus:ring-[#1A73E8] focus:border-[#1A73E8]'
-                                    }`}
+                                        }`}
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
 
-                            {/* Szűrő */}
+
                             <select
                                 value={filter}
                                 onChange={(e) => setFilter(e.target.value)}
-                                className={`w-full md:w-auto px-4 py-2.5 border rounded-lg focus:ring-2 focus:outline-none ${
-                                    theme === 'dark' 
-                                        ? 'bg-gray-700 text-white border-gray-600 focus:ring-[#1A73E8] focus:border-[#1A73E8]' 
+                                className={`w-full md:w-auto px-4 py-2.5 border rounded-lg focus:ring-2 focus:outline-none ${theme === 'dark'
+                                        ? 'bg-gray-700 text-white border-gray-600 focus:ring-[#1A73E8] focus:border-[#1A73E8]'
                                         : 'bg-white text-[#073F48] border-gray-300 focus:ring-[#1A73E8] focus:border-[#1A73E8]'
-                                }`}
+                                    }`}
                             >
                                 <option value="all">Összes</option>
                                 <option value="approved">Jóváhagyottak</option>
@@ -264,7 +271,6 @@ const AdminPanelPosts = () => {
                     </div>
 
                     {isMobile ? (
-                        /* Kártya nézet mobilon - az első osztályt módosítjuk */
                         <div className="grid grid-cols-1 gap-6">
                             {filteredAnimals.length === 0 ? (
                                 <div className={`col-span-full py-12 text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
@@ -272,48 +278,44 @@ const AdminPanelPosts = () => {
                                 </div>
                             ) : (
                                 filteredAnimals.map((animal) => (
-                                    <div 
-                                        key={animal.id} 
-                                        className={`relative flex flex-col rounded-xl overflow-hidden shadow-md border ${
-                                            theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                                        }`}
+                                    <div
+                                        key={animal.id}
+                                        className={`relative flex flex-col rounded-xl overflow-hidden shadow-md border ${theme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
+                                            }`}
                                     >
-                                        {/* Állat kép - magasságot növeljük */}
+
                                         <div className="h-40 w-full relative">
                                             {animal.filePath ? (
-                                                <img 
+                                                <img
                                                     src={`http://localhost:8000/${animal.filePath}`}
                                                     alt={animal.allatfaj}
                                                     className="w-full h-full object-cover"
                                                     onError={(e) => e.target.style.display = 'none'}
                                                 />
                                             ) : (
-                                                <div className={`w-full h-full flex items-center justify-center ${
-                                                    theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
-                                                }`}>
+                                                <div className={`w-full h-full flex items-center justify-center ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                                                    }`}>
                                                     <FaPaw className={`text-4xl ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`} />
                                                 </div>
                                             )}
-                                            
-                                            {/* Státusz ikon */}
+
+
                                             <div className="absolute top-2 left-2">
-                                                <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
-                                                    animal.elutasitva === "true"
+                                                <span className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${animal.elutasitva === "true"
                                                         ? theme === 'dark' ? 'bg-red-900/30 text-red-400' : 'bg-red-100 text-red-800'
                                                         : animal.elutasitva === "false"
                                                             ? theme === 'dark' ? 'bg-green-900/30 text-green-400' : 'bg-green-100 text-green-800'
                                                             : theme === 'dark' ? 'bg-yellow-900/30 text-yellow-400' : 'bg-yellow-100 text-yellow-800'
-                                                }`}>
-                                                    {animal.elutasitva === "true" 
-                                                        ? "Elutasítva" 
-                                                        : animal.elutasitva === "false" 
-                                                            ? "Jóváhagyva" 
+                                                    }`}>
+                                                    {animal.elutasitva === "true"
+                                                        ? "Elutasítva"
+                                                        : animal.elutasitva === "false"
+                                                            ? "Jóváhagyva"
                                                             : "Jóváhagyásra vár"}
                                                 </span>
                                             </div>
                                         </div>
-                                        
-                                        {/* Tartalom - több paddingot adunk */}
+
                                         <div className="p-5">
                                             <h3 className={`font-bold text-lg mb-2 ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
                                                 {animal.allatfaj}
@@ -325,28 +327,24 @@ const AdminPanelPosts = () => {
                                                 Beküldő: {animal.user?.username || '-'}
                                             </p>
                                         </div>
-                                        
-                                        {/* Műveletek - gombokat nagyobbá tesszük */}
-                                        <div className={`flex divide-x border-t ${
-                                            theme === 'dark' ? 'border-gray-700 divide-gray-700' : 'border-gray-200 divide-gray-200'
-                                        }`}>
+
+                                        <div className={`flex divide-x border-t ${theme === 'dark' ? 'border-gray-700 divide-gray-700' : 'border-gray-200 divide-gray-200'
+                                            }`}>
                                             <button
                                                 onClick={() => openModal(animal)}
-                                                className={`flex-1 py-3 flex items-center justify-center ${
-                                                    theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'
-                                                }`}
+                                                className={`flex-1 py-3 flex items-center justify-center ${theme === 'dark' ? 'text-gray-300 hover:bg-gray-700' : 'text-gray-600 hover:bg-gray-50'
+                                                    }`}
                                                 title="Részletek"
                                             >
                                                 <FaInfoCircle />
                                             </button>
-                                            
+
                                             {animal.elutasitva === "" ? (
                                                 <>
                                                     <button
                                                         onClick={() => handleApproveAnimal(animal.id)}
-                                                        className={`flex-1 py-3 flex items-center justify-center ${
-                                                            theme === 'dark' ? 'text-green-400 hover:bg-gray-700' : 'text-green-600 hover:bg-gray-50'
-                                                        }`}
+                                                        className={`flex-1 py-3 flex items-center justify-center ${theme === 'dark' ? 'text-green-400 hover:bg-gray-700' : 'text-green-600 hover:bg-gray-50'
+                                                            }`}
                                                         title="Jóváhagy"
                                                     >
                                                         <FaCheck />
@@ -356,21 +354,19 @@ const AdminPanelPosts = () => {
                                                             setSelectedPostId(animal.id);
                                                             setShowRejectionModal(true);
                                                         }}
-                                                        className={`flex-1 py-3 flex items-center justify-center ${
-                                                            theme === 'dark' ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-gray-50'
-                                                        }`}
+                                                        className={`flex-1 py-3 flex items-center justify-center ${theme === 'dark' ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-gray-50'
+                                                            }`}
                                                         title="Elutasít"
                                                     >
                                                         <FaTimes />
                                                     </button>
                                                 </>
                                             ) : null}
-                                            
+
                                             <button
                                                 onClick={() => openDeleteModal(animal)}
-                                                className={`flex-1 py-3 flex items-center justify-center ${
-                                                    theme === 'dark' ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-gray-50'
-                                                }`}
+                                                className={`flex-1 py-3 flex items-center justify-center ${theme === 'dark' ? 'text-red-400 hover:bg-gray-700' : 'text-red-600 hover:bg-gray-50'
+                                                    }`}
                                                 title="Törlés"
                                             >
                                                 <FaTrash />
@@ -381,7 +377,6 @@ const AdminPanelPosts = () => {
                             )}
                         </div>
                     ) : (
-                        /* Táblázat nézet asztali eszközökön - változatlan */
                         <div className="overflow-x-auto">
                             <table className="w-full">
                                 <thead className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'} text-left`}>
@@ -413,16 +408,14 @@ const AdminPanelPosts = () => {
                                 </thead>
                                 <tbody>
                                     {filteredAnimals.map((animal) => (
-                                        <tr key={animal.id} className={`border-b ${
-                                            theme === 'dark' 
-                                                ? 'border-gray-700 hover:bg-gray-700/80' 
+                                        <tr key={animal.id} className={`border-b ${theme === 'dark'
+                                                ? 'border-gray-700 hover:bg-gray-700/80'
                                                 : 'border-gray-200 hover:bg-gray-50'
-                                        }`}>
+                                            }`}>
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${
-                                                        theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
-                                                    }`}>
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-3 ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-100'
+                                                        }`}>
                                                         <FaPaw className={theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} />
                                                     </div>
                                                     <span className={`${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
@@ -434,8 +427,7 @@ const AdminPanelPosts = () => {
                                                 {animal.kategoria || '-'}
                                             </td>
                                             <td className="py-4 px-4">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
-                                                    animal.elutasitva === "true"
+                                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${animal.elutasitva === "true"
                                                         ? theme === 'dark'
                                                             ? 'bg-red-900/30 text-red-400'
                                                             : 'bg-red-100 text-red-800'
@@ -446,11 +438,11 @@ const AdminPanelPosts = () => {
                                                             : theme === 'dark'
                                                                 ? 'bg-yellow-900/30 text-yellow-400'
                                                                 : 'bg-yellow-100 text-yellow-800'
-                                                }`}>
-                                                    {animal.elutasitva === "true" 
-                                                        ? "Elutasítva" 
-                                                        : animal.elutasitva === "false" 
-                                                            ? "Jóváhagyva" 
+                                                    }`}>
+                                                    {animal.elutasitva === "true"
+                                                        ? "Elutasítva"
+                                                        : animal.elutasitva === "false"
+                                                            ? "Jóváhagyva"
                                                             : "Jóváhagyásra vár"}
                                                 </span>
                                             </td>
@@ -460,11 +452,10 @@ const AdminPanelPosts = () => {
                                                         <>
                                                             <button
                                                                 onClick={() => handleApproveAnimal(animal.id)}
-                                                                className={`p-2 rounded-lg transition-colors ${
-                                                                    theme === 'dark'
+                                                                className={`p-2 rounded-lg transition-colors ${theme === 'dark'
                                                                         ? 'bg-green-900/20 hover:bg-green-900/30 text-green-400'
                                                                         : 'bg-green-100 hover:bg-green-200 text-green-600'
-                                                                }`}
+                                                                    }`}
                                                                 title="Jóváhagyás"
                                                             >
                                                                 <FaCheck className="w-4 h-4" />
@@ -474,11 +465,10 @@ const AdminPanelPosts = () => {
                                                                     setSelectedPostId(animal.id);
                                                                     setShowRejectionModal(true);
                                                                 }}
-                                                                className={`p-2 rounded-lg transition-colors ${
-                                                                    theme === 'dark'
+                                                                className={`p-2 rounded-lg transition-colors ${theme === 'dark'
                                                                         ? 'bg-red-900/20 hover:bg-red-900/30 text-red-400'
                                                                         : 'bg-red-100 hover:bg-red-200 text-red-600'
-                                                                }`}
+                                                                    }`}
                                                                 title="Elutasítás"
                                                             >
                                                                 <FaTimes className="w-4 h-4" />
@@ -487,22 +477,20 @@ const AdminPanelPosts = () => {
                                                     )}
                                                     <button
                                                         onClick={() => openDeleteModal(animal)}
-                                                        className={`p-2 rounded-lg transition-colors ${
-                                                            theme === 'dark'
+                                                        className={`p-2 rounded-lg transition-colors ${theme === 'dark'
                                                                 ? 'bg-red-900/20 hover:bg-red-900/30 text-red-400'
                                                                 : 'bg-red-100 hover:bg-red-200 text-red-600'
-                                                        }`}
+                                                            }`}
                                                         title="Törlés"
                                                     >
                                                         <FaTrash className="w-4 h-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => openModal(animal)}
-                                                        className={`p-2 rounded-lg transition-colors ${
-                                                            theme === 'dark'
+                                                        className={`p-2 rounded-lg transition-colors ${theme === 'dark'
                                                                 ? 'bg-gray-700 hover:bg-gray-600 text-gray-300'
                                                                 : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
-                                                        }`}
+                                                            }`}
                                                         title="Részletek"
                                                     >
                                                         <FaInfoCircle className="w-4 h-4" />
@@ -523,15 +511,13 @@ const AdminPanelPosts = () => {
                     )}
                 </div>
             </div>
-
-            {/* Post Details Modal */}
             <AnimalDetailsModal
                 isOpen={modalIsOpen}
                 onClose={closeModal}
                 animal={selectedAnimal}
             />
 
-            {/* Rejection Modal */}
+
             <Modal
                 isOpen={showRejectionModal}
                 onRequestClose={() => setShowRejectionModal(false)}
@@ -541,7 +527,7 @@ const AdminPanelPosts = () => {
                     overlay: {
                         backgroundColor: 'rgba(0, 0, 0, 0.5)',
                         backdropFilter: 'blur(4px)',
-                        zIndex: 1000 // Ensure higher z-index than navbar
+                        zIndex: 1000
                     },
                     content: {
                         position: 'relative',
@@ -559,31 +545,28 @@ const AdminPanelPosts = () => {
                         </h3>
                         <button
                             onClick={() => setShowRejectionModal(false)}
-                            className={`p-2 rounded-lg transition-colors ${
-                                theme === "dark"
+                            className={`p-2 rounded-lg transition-colors ${theme === "dark"
                                     ? "hover:bg-gray-700 text-gray-400 hover:text-gray-300"
                                     : "hover:bg-gray-100 text-gray-600 hover:text-gray-800"
-                            }`}
+                                }`}
                         >
                             <FaTimes className="w-5 h-5" />
                         </button>
                     </div>
-                    
+
                     <div className="space-y-4">
                         <div>
-                            <label className={`block text-sm font-medium mb-2 ${
-                                theme === "dark" ? "text-gray-300" : "text-gray-700"
-                            }`}>
+                            <label className={`block text-sm font-medium mb-2 ${theme === "dark" ? "text-gray-300" : "text-gray-700"
+                                }`}>
                                 Elutasítás oka
                             </label>
                             <select
                                 value={rejectionReason}
                                 onChange={(e) => setRejectionReason(e.target.value)}
-                                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${
-                                    theme === "dark" 
-                                        ? "bg-gray-700 border-gray-600 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]" 
+                                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${theme === "dark"
+                                        ? "bg-gray-700 border-gray-600 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]"
                                         : "bg-white border-gray-300 text-[#073F48] focus:ring-[#1A73E8] focus:border-[#1A73E8]"
-                                }`}
+                                    }`}
                             >
                                 <option value="">Válassz okot...</option>
                                 {predefinedReasons.map((reason, index) => (
@@ -593,20 +576,18 @@ const AdminPanelPosts = () => {
                         </div>
 
                         <div>
-                            <label className={`block text-sm font-medium mb-2 ${
-                                theme === "dark" ? "text-gray-300" : "text-gray-700"
-                            }`}>
+                            <label className={`block text-sm font-medium mb-2 ${theme === "dark" ? "text-gray-300" : "text-gray-700"
+                                }`}>
                                 Egyéni üzenet (opcionális)
                             </label>
                             <textarea
                                 placeholder="Adj meg további részleteket..."
                                 value={customMessage}
                                 onChange={(e) => setCustomMessage(e.target.value)}
-                                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${
-                                    theme === "dark" 
-                                        ? "bg-gray-700 border-gray-600 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]" 
+                                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:outline-none transition-colors ${theme === "dark"
+                                        ? "bg-gray-700 border-gray-600 text-white focus:ring-[#1A73E8] focus:border-[#1A73E8]"
                                         : "bg-white border-gray-300 text-[#073F48] focus:ring-[#1A73E8] focus:border-[#1A73E8]"
-                                }`}
+                                    }`}
                                 rows="3"
                             />
                         </div>
@@ -615,22 +596,20 @@ const AdminPanelPosts = () => {
                     <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <button
                             onClick={() => setShowRejectionModal(false)}
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                theme === "dark"
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${theme === "dark"
                                     ? "bg-gray-700 hover:bg-gray-600 text-white"
                                     : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-                            }`}
+                                }`}
                         >
                             <FaTimes className="inline-block mr-2" />
                             Mégse
                         </button>
                         <button
                             onClick={() => handleRejectAnimal(selectedPostId)}
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                theme === "dark"
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${theme === "dark"
                                     ? "bg-red-900/20 hover:bg-red-900/30 text-red-400"
                                     : "bg-red-100 hover:bg-red-200 text-red-600"
-                            }`}
+                                }`}
                             disabled={!rejectionReason}
                         >
                             <FaTimes className="inline-block mr-2" />
@@ -640,7 +619,6 @@ const AdminPanelPosts = () => {
                 </div>
             </Modal>
 
-            {/* Delete Confirmation Modal */}
             <Modal
                 isOpen={showDeleteModal}
                 onRequestClose={closeDeleteModal}
@@ -650,7 +628,7 @@ const AdminPanelPosts = () => {
                     overlay: {
                         backgroundColor: 'rgba(0, 0, 0, 0.5)',
                         backdropFilter: 'blur(4px)',
-                        zIndex: 1000 // Ensure higher z-index than navbar
+                        zIndex: 1000
                     },
                     content: {
                         position: 'relative',
@@ -668,16 +646,15 @@ const AdminPanelPosts = () => {
                         </h3>
                         <button
                             onClick={closeDeleteModal}
-                            className={`p-2 rounded-lg transition-colors ${
-                                theme === "dark"
+                            className={`p-2 rounded-lg transition-colors ${theme === "dark"
                                     ? "hover:bg-gray-700 text-gray-400 hover:text-gray-300"
                                     : "hover:bg-gray-100 text-gray-600 hover:text-gray-800"
-                            }`}
+                                }`}
                         >
                             <FaTimes className="w-5 h-5" />
                         </button>
                     </div>
-                    
+
                     <p className="text-lg">
                         Biztosan törölni szeretnéd a(z) <span className="font-semibold">{animalToDelete?.allatfaj}</span> állatot?
                     </p>
@@ -685,11 +662,10 @@ const AdminPanelPosts = () => {
                     <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <button
                             onClick={closeDeleteModal}
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                theme === "dark"
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${theme === "dark"
                                     ? "bg-gray-700 hover:bg-gray-600 text-white"
                                     : "bg-gray-100 hover:bg-gray-200 text-gray-800"
-                            }`}
+                                }`}
                         >
                             <FaTimes className="inline-block mr-2" />
                             Mégse
@@ -699,11 +675,10 @@ const AdminPanelPosts = () => {
                                 handleDeleteAnimal(animalToDelete?.id);
                                 closeDeleteModal();
                             }}
-                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                                theme === "dark"
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${theme === "dark"
                                     ? "bg-red-900/20 hover:bg-red-900/30 text-red-400"
                                     : "bg-red-100 hover:bg-red-200 text-red-600"
-                            }`}
+                                }`}
                         >
                             <FaTrash className="inline-block mr-2" />
                             Törlés
@@ -711,8 +686,6 @@ const AdminPanelPosts = () => {
                     </div>
                 </div>
             </Modal>
-
-            <ToastContainer position="bottom-right" theme={theme} />
         </div>
     );
 };

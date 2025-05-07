@@ -30,7 +30,7 @@ const Settings = () => {
                     </div>
 
                     <div className="space-y-8">
-                        {/* Téma beállítások */}
+                        {/* Téma beállítás */}
                         <div className={`p-4 md:p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
                             <h3 className={`text-lg font-semibold mb-4 flex items-center ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
                                 <FaMoon className="w-5 h-5 mr-2 text-[#1A73E8]" />
@@ -132,7 +132,7 @@ const Settings = () => {
                             </div>
                         </div>
 
-                        {/* Nyelv beállítások */}
+                        {/* Nyelvi beállítás */}
                         <div className={`p-4 md:p-6 rounded-lg ${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'}`}>
                             <h3 className={`text-lg font-semibold mb-4 flex items-center ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
                                 <FaLanguage className="w-5 h-5 mr-2 text-[#1A73E8]" />

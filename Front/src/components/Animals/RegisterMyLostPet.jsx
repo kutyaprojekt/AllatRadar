@@ -14,7 +14,7 @@ const RegisterMyLostPet = () => {
   const token = localStorage.getItem("usertoken");
   const { theme } = useTheme();
 
-  // Add state for form steps
+  // Űrlap lépések állapota
   const [currentStep, setCurrentStep] = useState(1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -53,7 +53,7 @@ const RegisterMyLostPet = () => {
   const writeData = (e) => {
     const { id, value } = e.target;
 
-    // Fields that should have first letter of each word capitalized
+    // Nagybetűsítendő mezők
     const capitalizeFields = ['allatfaj', 'allatkategoria', 'allatneme', 'allatszine', 'eltuneshelyszine'];
 
     if (capitalizeFields.includes(id)) {
@@ -78,7 +78,7 @@ const RegisterMyLostPet = () => {
     const finalDate = date || new Date();
     setSelectedDate(finalDate);
 
-    // Format the date as YYYY-MM-DD for storage
+    // Dátum formázása YYYY-MM-DD formátumban
     const year = finalDate.getFullYear();
     const month = (finalDate.getMonth() + 1).toString().padStart(2, '0');
     const day = finalDate.getDate().toString().padStart(2, '0');
@@ -124,8 +124,7 @@ const RegisterMyLostPet = () => {
       const data = await response.json();
       if (data.message === "Sikeres adatfelvitel!") {
         SetRefresh((prev) => !prev);
-        
-        // Egyetlen toast üzenet jóváhagyásról
+
         toast.success("Bejegyzése jóváhagyásra vár", {
           position: "top-right",
           autoClose: 1500,
@@ -139,7 +138,6 @@ const RegisterMyLostPet = () => {
         toast.error(data.error || "Hiba történt a feltöltés során");
       }
     } catch (error) {
-      console.error("Hiba történt az adatküldéskor:", error);
       toast.error("Hiba történt az adatküldéskor: " + (error.message || error));
     }
   };
@@ -158,7 +156,7 @@ const RegisterMyLostPet = () => {
     window.scrollTo(0, 0);
   };
 
-  // A dátumválasztó komponens módosítása
+  // Egyedi dátumválasztó komponens
   const CustomInput = React.forwardRef(({ value, onClick }, ref) => (
     <div className="relative w-full">
       <FaCalendarAlt className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "text-gray-400" : "text-[#0c4a6e]"} text-lg z-10`} />
@@ -173,10 +171,9 @@ const RegisterMyLostPet = () => {
     </div>
   ));
 
-  // Step 1 fields
+  // 1. lépés mezői
   const renderStep1 = () => (
     <>
-      {/* Állatfaj */}
       <div className={isMobile ? "col-span-2" : "col-span-1"}>
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Állatfaj <span className="text-red-500">*</span></label>
         <div className="relative w-full">
@@ -193,7 +190,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Állatkategória */}
       <div className={isMobile ? "col-span-2" : "col-span-1"}>
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Állatkategória</label>
         <div className="relative w-full">
@@ -209,7 +205,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Chipszám */}
       <div className={isMobile ? "col-span-2" : "col-span-1"}>
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Microchip Szám</label>
         <div className="relative w-full">
@@ -239,7 +234,6 @@ const RegisterMyLostPet = () => {
         )}
       </div>
 
-      {/* Eltűnés dátuma */}
       <div className={isMobile ? "col-span-2" : "col-span-1"}>
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Eltűnés Időpontja <span className="text-red-500">*</span></label>
         <div className="w-full">
@@ -255,7 +249,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Navigációs gombok - csak mobilnézetben */}
       {isMobile && (
         <div className="col-span-2 flex justify-end">
           <button
@@ -266,15 +259,12 @@ const RegisterMyLostPet = () => {
           </button>
         </div>
       )}
-
-
     </>
   );
 
-  // Step 2 fields
+  // 2. lépés mezői
   const renderStep2 = () => (
     <>
-      {/* Kisállat Neme */}
       <div className={isMobile ? "col-span-2" : "col-span-1"}>
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Kisállat Neme</label>
         <div className="relative w-full">
@@ -290,7 +280,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Kisállat Színe */}
       <div className={isMobile ? "col-span-2" : "col-span-1"}>
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Kisállat Színe</label>
         <div className="relative w-full">
@@ -306,7 +295,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Kisállat Mérete */}
       <div className={isMobile ? "col-span-2" : "col-span-1"}>
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Kisállat Mérete</label>
         <div className="relative w-full">
@@ -325,7 +313,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Navigációs gombok - csak mobilnézetben */}
       {isMobile && (
         <div className="col-span-2 flex justify-between">
           <button
@@ -345,10 +332,9 @@ const RegisterMyLostPet = () => {
     </>
   );
 
-  // Step 3 fields
+  // 3. lépés mezői
   const renderStep3 = () => (
     <>
-      {/* Eltűnés helyszíne */}
       <div className={isMobile ? "col-span-2" : "col-span-1"}>
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Eltűnés Helyszíne <span className="text-red-500">*</span></label>
         <div className="relative w-full">
@@ -365,7 +351,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Egyéb Információk */}
       <div className="col-span-2">
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Egyéb Információk</label>
         <div className="relative w-full">
@@ -381,7 +366,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Kép feltöltése */}
       <div className="col-span-2">
         <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Kép feltöltése <span className="text-red-500">*</span></label>
         <div className="relative w-full">
@@ -396,7 +380,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Navigációs gombok - csak mobilnézetben */}
       {isMobile && (
         <div className="col-span-2 flex justify-between">
           <button
@@ -418,7 +401,6 @@ const RegisterMyLostPet = () => {
 
   return (
     <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-gray-900" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]"} p-4`}>
-      {/* Bal oldal: Űrlap */}
       <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} p-6 rounded-3xl shadow-xl w-full max-w-lg border-2 ${theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"}`}>
         {isMobile ? (
           <div className="mb-6">
@@ -431,24 +413,24 @@ const RegisterMyLostPet = () => {
                   <React.Fragment key={step}>
                     <div
                       className={`w-8 h-8 rounded-full flex items-center justify-center z-10 ${currentStep >= step
-                          ? theme === "dark"
-                            ? "bg-blue-500 text-white"
-                            : "bg-[#0c4a6e] text-white"
-                          : theme === "dark"
-                            ? "bg-gray-600 text-gray-300"
-                            : "bg-gray-200 text-gray-500"
+                        ? theme === "dark"
+                          ? "bg-blue-500 text-white"
+                          : "bg-[#0c4a6e] text-white"
+                        : theme === "dark"
+                          ? "bg-gray-600 text-gray-300"
+                          : "bg-gray-200 text-gray-500"
                         }`}
                     >
                       {step}
                     </div>
                     {step < 3 && (
                       <div className={`flex-1 h-1 ${currentStep > step
-                          ? theme === "dark"
-                            ? "bg-blue-500"
-                            : "bg-[#0c4a6e]"
-                          : theme === "dark"
-                            ? "bg-gray-600"
-                            : "bg-gray-200"
+                        ? theme === "dark"
+                          ? "bg-blue-500"
+                          : "bg-[#0c4a6e]"
+                        : theme === "dark"
+                          ? "bg-gray-600"
+                          : "bg-gray-200"
                         }`}></div>
                     )}
                   </React.Fragment>
@@ -530,7 +512,6 @@ const RegisterMyLostPet = () => {
         </div>
       </div>
 
-      {/* Jobb oldal: Kép és inspiráló szöveg (csak gépi nézetben) */}
       <div className="hidden xl:flex flex-col justify-center items-center ml-8 w-1/3">
         <div className={`mt-6 text-center p-8 rounded-3xl shadow-xl border-2 ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white bg-opacity-90 border-[#0c4a6e]"} flex flex-col justify-between`} style={{ minHeight: "600px" }}>
           <div>
@@ -572,7 +553,7 @@ const RegisterMyLostPet = () => {
           </div>
         </div>
       </div>
-      <ToastContainer 
+      <ToastContainer
         position="top-right"
         autoClose={3000}
         hideProgressBar={false}

@@ -12,7 +12,7 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
     const textSecondary = theme === "dark" ? "text-gray-400" : "text-gray-600";
     const borderColor = theme === "dark" ? "border-gray-700" : "border-gray-300";
 
-    // Format date function to convert ISO date to readable format
+    // ISO dátum átalakítása olvasható formátumra
     const formatDate = (dateString) => {
         if (!dateString) return "Nincs dátum";
         try {
@@ -29,16 +29,16 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
     };
 
     const handleAfterOpen = () => {
-        document.body.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
     };
 
     const handleAfterClose = () => {
-        document.body.style.overflow = 'auto';
+        document.body.classList.remove('modal-open');
     };
 
     useEffect(() => {
         return () => {
-            document.body.style.overflow = 'auto';
+            document.body.classList.remove('modal-open');
         };
     }, []);
 
@@ -72,11 +72,7 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
 
             {animal && (
                 <div className="flex flex-col gap-10">
-
-                    {/* Fő információs blokk */}
                     <div className="flex flex-col md:flex-row gap-10">
-
-                        {/* Bal oldali kép */}
                         {animal.filePath && (
                             <div className="w-full md:w-1/3 flex justify-center">
                                 <div className="w-60 h-60 rounded-lg overflow-hidden shadow-lg border-2 border-gray-300">
@@ -89,7 +85,6 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
                             </div>
                         )}
 
-                        {/* Jobb oldali információk */}
                         <div className="w-full md:w-2/3 flex flex-col gap-6">
                             <div className="text-center md:text-left">
                                 <h2 className="text-3xl font-bold flex items-center gap-2">
@@ -124,7 +119,6 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
                         </div>
                     </div>
 
-                    {/* Egyéb információk és tulajdonos adatai egymás mellett */}
                     <div className="flex flex-col md:flex-row gap-6">
                         {animal.user && (
                             <div className="p-4 rounded-xl shadow-md border border-blue-300 bg-blue-100 dark:bg-blue-900 md:w-72 h-fit">
@@ -145,7 +139,6 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
                             </div>
                         )}
 
-                        {/* Egyéb információk */}
                         <div className={`${cardBg} p-5 rounded-xl shadow-md flex-1`}>
                             <h3 className="font-semibold flex items-center gap-2 text-xl">
                                 <FaInfoCircle className="text-yellow-500" /> Egyéb információk

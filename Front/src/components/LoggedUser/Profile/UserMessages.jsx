@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useTheme } from "../../../context/ThemeContext";
 import { FaExclamationTriangle, FaEdit, FaPaperPlane, FaTimes, FaImage, FaCalendarAlt } from 'react-icons/fa';
 import { toast, ToastContainer } from 'react-toastify';
@@ -6,8 +6,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import SideBarMenu from '../../Assets/SidebarMenu/SideBarMenu';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import UserContext from '../../../context/UserContext';
 
-// Egyedi stílusok a dátumválasztóhoz
+// Dátumválasztó stílus
 const customDatePickerStyle = `
   .react-datepicker-wrapper,
   .react-datepicker__input-container {
@@ -80,12 +81,10 @@ const customDatePickerStyle = `
     color: #E5E7EB;
   }
   
-  /* DatePicker pozícionálási javítások */
   .react-datepicker-popper {
     z-index: 9999 !important;
   }
   
-  /* Mobilon kisebb méretű DatePicker */
   @media (max-width: 640px) {
     .react-datepicker {
       font-size: 0.8rem;
@@ -103,6 +102,7 @@ const UserMessages = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const token = localStorage.getItem("usertoken");
   const { theme } = useTheme();
+  const { refresh, SetRefresh } = useContext(UserContext);
   const [activeTab, setActiveTab] = useState('uzenetek');
   const [isAdmin, setIsAdmin] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -110,7 +110,7 @@ const UserMessages = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
 
-  // Egyedi input a DatePicker komponenshez
+  // Egyedi DatePicker input
   const CustomInput = React.forwardRef(({ value, onClick }, ref) => (
     <div className="relative w-full">
       <FaCalendarAlt className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "text-gray-400" : "text-[#1A73E8]"} text-lg z-10`} />
@@ -125,7 +125,7 @@ const UserMessages = () => {
     </div>
   ));
 
-  // Dátum változás kezelése
+  // Dátum változás kezelés
   const handleDateChange = (date) => {
     const finalDate = date || new Date();
     setSelectedDate(finalDate);
@@ -136,18 +136,17 @@ const UserMessages = () => {
   };
 
   useEffect(() => {
-    // Adjuk hozzá az egyedi stílusokat a head-hez
+    // Stílus hozzáadása
     const styleElement = document.createElement('style');
     styleElement.textContent = customDatePickerStyle;
     document.head.appendChild(styleElement);
-    
+
     return () => {
-      // Távolítsuk el a stílusokat
       styleElement.remove();
     };
   }, []);
 
-  // Dátum formázása
+  // Dátum formázás
   const formatDate = (dateString) => {
     if (!dateString) return "Ismeretlen dátum";
     const date = new Date(dateString);
@@ -155,7 +154,7 @@ const UserMessages = () => {
     return date.toLocaleDateString('hu-HU');
   };
 
-  // Admin jogosultság ellenőrzése
+  // Admin jogosultság ellenőrzés
   useEffect(() => {
     const checkAdminStatus = async () => {
       try {
@@ -167,7 +166,7 @@ const UserMessages = () => {
         const userData = await response.json();
         setIsAdmin(userData.admin === "true");
       } catch (error) {
-        console.error("Hiba a felhasználó adatok lekérésekor:", error);
+        toast.error("Hiba a felhasználó adatok lekérésekor");
       }
     };
     checkAdminStatus();
@@ -191,12 +190,11 @@ const UserMessages = () => {
       const postsData = await postsResponse.json();
       setRejectedPosts(postsData);
     } catch (error) {
-      console.error('Hiba történt:', error);
       toast.error('Hiba történt az adatok lekérése során');
     }
   };
 
-  // Poszt szerkesztése
+  // Poszt szerkesztés megnyitás
   const openEditModal = (post) => {
     setEditingPost(post);
     setEditedData({
@@ -216,6 +214,7 @@ const UserMessages = () => {
     setIsEditModalOpen(true);
   };
 
+  // Modal bezárás
   const closeEditModal = () => {
     setEditingPost(null);
     setIsEditModalOpen(false);
@@ -223,13 +222,12 @@ const UserMessages = () => {
     setImagePreview(null);
   };
 
-  // Kép kezelése
+  // Kép feltöltés kezelés
   const handleImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setNewImage(file);
-      
-      // Előnézet beállítása
+
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result);
@@ -238,20 +236,17 @@ const UserMessages = () => {
     }
   };
 
-  // Poszt újraküldése
+  // Poszt újraküldés
   const handleSave = async () => {
     try {
-      // FormData használata a kép feltöltéshez
       const formData = new FormData();
-      
-      // Szöveges adatok hozzáadása
+
       Object.keys(editedData).forEach(key => {
         if (editedData[key] !== null && editedData[key] !== undefined) {
           formData.append(key, editedData[key]);
         }
       });
-      
-      // Kép hozzáadása, ha van új kép
+
       if (newImage) {
         formData.append('kep', newImage);
       }
@@ -260,7 +255,6 @@ const UserMessages = () => {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
-          // Ne állítsuk be a Content-Type-ot, mert a böngésző automatikusan beállítja a határt a FormData számára
         },
         body: formData
       });
@@ -271,25 +265,27 @@ const UserMessages = () => {
 
       closeEditModal();
       toast.success('Poszt sikeresen újraküldve jóváhagyásra!');
+
       fetchData();
+
+      SetRefresh(prev => !prev);
     } catch (error) {
-      console.error('Hiba történt:', error);
       toast.error('Hiba történt a poszt újraküldése során');
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [refresh]);
 
   return (
     <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]"}`}>
       <div className="container mx-auto px-4 pt-24 pb-12 flex flex-col md:flex-row gap-8">
-        {/* SideBarMenu komponens */}
-        <SideBarMenu 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab} 
-          isAdmin={isAdmin} 
+        {/* Oldalsáv menü */}
+        <SideBarMenu
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          isAdmin={isAdmin}
         />
 
         {/* Fő tartalom */}
@@ -306,19 +302,18 @@ const UserMessages = () => {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {rejectedPosts.map((post) => (
-                <div 
-                  key={post.id} 
+                <div
+                  key={post.id}
                   className={`relative flex flex-col justify-between p-6 rounded-2xl shadow-md border transition hover:shadow-lg ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-gray-50 border-gray-200"}`}
                 >
                   {/* Állat képe */}
                   {post.kep && (
                     <div className="mb-4 relative w-full h-48 rounded-lg overflow-hidden">
-                      <img 
-                        src={`http://localhost:8000/images/${post.kep}`} 
+                      <img
+                        src={`http://localhost:8000/images/${post.kep}`}
                         alt={`${post.allatfaj} képe`}
                         className="w-full h-full object-cover"
                         onError={(e) => {
-                          console.error('Kép betöltési hiba:', e);
                           e.target.style.display = 'none';
                         }}
                       />
@@ -357,18 +352,18 @@ const UserMessages = () => {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen px-4">
             {/* Háttér overlay */}
-            <div 
+            <div
               className="fixed inset-0 bg-black bg-opacity-40"
               onClick={closeEditModal}
             />
-            
+
             {/* Modal tartalom */}
             <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl mx-auto p-0 z-50 overflow-hidden border border-gray-200 dark:border-gray-700">
               {/* Fejléc */}
               <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
                 <h2 className="text-2xl font-bold text-[#1A73E8] dark:text-blue-300">Poszt szerkesztése</h2>
-                <button 
-                  onClick={closeEditModal} 
+                <button
+                  onClick={closeEditModal}
                   className="text-gray-400 hover:text-gray-600 dark:hover:text-white p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                 >
                   <FaTimes className="w-5 h-5" />
@@ -377,11 +372,11 @@ const UserMessages = () => {
 
               {/* Tartalom */}
               <div className="flex flex-col md:flex-row gap-6 px-8 py-6 bg-white dark:bg-gray-800">
-                {/* Bal oldal: kép szerkesztés */}
+                {/* Kép szerkesztés */}
                 <div className="md:w-2/5 w-full flex flex-col items-center">
                   <div className="w-full h-72 rounded-2xl overflow-hidden shadow-lg border-2 border-blue-200 dark:border-blue-900 bg-gray-50 dark:bg-gray-900 flex items-center justify-center mb-4 relative group">
                     {imagePreview ? (
-                      <img 
+                      <img
                         src={imagePreview}
                         alt="Állat képe"
                         className="w-full h-full object-cover"
@@ -389,13 +384,13 @@ const UserMessages = () => {
                     ) : (
                       <span className="text-3xl font-bold text-gray-400 dark:text-gray-600">KÉP</span>
                     )}
-                    
+
                     {/* Kép feltöltés overlay */}
                     <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
                       <label className="cursor-pointer bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
                         <FaImage className="h-6 w-6 text-blue-500" />
-                        <input 
-                          type="file" 
+                        <input
+                          type="file"
                           accept="image/*"
                           className="hidden"
                           onChange={handleImageChange}
@@ -407,13 +402,13 @@ const UserMessages = () => {
                     <span className="inline-block px-4 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 shadow mb-2">#{editingPost?.id}</span>
                     <span className="text-lg font-bold text-[#073F48] dark:text-white mb-1">{editedData.allatfaj}</span>
                     <span className="text-sm text-gray-500 dark:text-gray-400">{editedData.kategoria}</span>
-                    
+
                     {/* Kép feltöltési gomb */}
                     <label className="mt-3 cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                       <FaImage />
                       Kép módosítása
-                      <input 
-                        type="file" 
+                      <input
+                        type="file"
                         accept="image/*"
                         className="hidden"
                         onChange={handleImageChange}
@@ -426,8 +421,8 @@ const UserMessages = () => {
                     )}
                   </div>
                 </div>
-                
-                {/* Jobb oldal: mezők */}
+
+                {/* Adatmezők */}
                 <div className="md:w-3/5 w-full flex flex-col gap-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -435,7 +430,7 @@ const UserMessages = () => {
                       <input
                         type="text"
                         value={editedData.allatfaj}
-                        onChange={(e) => setEditedData({...editedData, allatfaj: e.target.value})}
+                        onChange={(e) => setEditedData({ ...editedData, allatfaj: e.target.value })}
                         className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
                       />
                     </div>
@@ -444,7 +439,7 @@ const UserMessages = () => {
                       <input
                         type="text"
                         value={editedData.kategoria}
-                        onChange={(e) => setEditedData({...editedData, kategoria: e.target.value})}
+                        onChange={(e) => setEditedData({ ...editedData, kategoria: e.target.value })}
                         className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
                       />
                     </div>
@@ -453,7 +448,7 @@ const UserMessages = () => {
                       <input
                         type="text"
                         value={editedData.neme}
-                        onChange={(e) => setEditedData({...editedData, neme: e.target.value})}
+                        onChange={(e) => setEditedData({ ...editedData, neme: e.target.value })}
                         className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
                       />
                     </div>
@@ -462,7 +457,7 @@ const UserMessages = () => {
                       <input
                         type="text"
                         value={editedData.szin}
-                        onChange={(e) => setEditedData({...editedData, szin: e.target.value})}
+                        onChange={(e) => setEditedData({ ...editedData, szin: e.target.value })}
                         className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
                       />
                     </div>
@@ -471,7 +466,7 @@ const UserMessages = () => {
                       <input
                         type="text"
                         value={editedData.meret}
-                        onChange={(e) => setEditedData({...editedData, meret: e.target.value})}
+                        onChange={(e) => setEditedData({ ...editedData, meret: e.target.value })}
                         className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
                       />
                     </div>
@@ -480,7 +475,7 @@ const UserMessages = () => {
                       <input
                         type="text"
                         value={editedData.helyszin}
-                        onChange={(e) => setEditedData({...editedData, helyszin: e.target.value})}
+                        onChange={(e) => setEditedData({ ...editedData, helyszin: e.target.value })}
                         className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
                       />
                     </div>
@@ -489,7 +484,7 @@ const UserMessages = () => {
                       <input
                         type="text"
                         value={editedData.chipszam}
-                        onChange={(e) => setEditedData({...editedData, chipszam: e.target.value})}
+                        onChange={(e) => setEditedData({ ...editedData, chipszam: e.target.value })}
                         className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
                       />
                     </div>
@@ -509,7 +504,7 @@ const UserMessages = () => {
                     <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Egyéb információ</label>
                     <textarea
                       value={editedData.egyeb_info}
-                      onChange={(e) => setEditedData({...editedData, egyeb_info: e.target.value})}
+                      onChange={(e) => setEditedData({ ...editedData, egyeb_info: e.target.value })}
                       className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
                       rows="3"
                     />
@@ -517,7 +512,7 @@ const UserMessages = () => {
                 </div>
               </div>
 
-              {/* Láb */}
+              {/* Lábléc */}
               <div className="flex justify-end gap-3 px-8 py-6 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
                 <button
                   onClick={closeEditModal}
@@ -536,7 +531,18 @@ const UserMessages = () => {
           </div>
         </div>
       )}
-      <ToastContainer position="bottom-right" theme={theme} />
+      <ToastContainer
+        position="top-right"
+        autoClose={2500}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        className="z-50"
+      />
     </div>
   );
 };

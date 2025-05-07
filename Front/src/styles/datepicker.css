@@ -73,19 +73,19 @@
   @apply text-gray-200;
 }
 
-/* DatePicker pozícionálási javítások */
+/* DatePicker pozícionálás */
 .react-datepicker-popper {
   @apply z-[9999] !important;
   margin-left: -50px !important;
 }
 
-/* Egyéni pozícionálási osztály, hogy biztosan ne bugoljon ki a modalból */
+/* Modal-specifikus pozícionálás */
 .datepicker-popper-left {
   margin-left: 0 !important;
   left: 0 !important;
 }
 
-/* Mobilon kisebb méretű DatePicker */
+/* Mobil méretezés */
 @media (max-width: 640px) {
   .react-datepicker {
     @apply text-sm;

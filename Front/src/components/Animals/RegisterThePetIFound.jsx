@@ -14,7 +14,7 @@ const RegisterThePetIFound = () => {
   const token = localStorage.getItem("usertoken");
   const { theme } = useTheme();
 
-  // Add state for form steps and mobile detection
+  // Űrlap lépések és mobil eszköz detektálás
   const [currentStep, setCurrentStep] = useState(1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
@@ -56,7 +56,7 @@ const RegisterThePetIFound = () => {
   }, [theme]);
 
   const writeData = (e) => {
-    // Fields that should have first letter of each word capitalized
+    // Mezők ahol a szavak első betűje nagybetűs
     const capitalizeFields = ['allatfaj', 'allatkategoria', 'allatneme', 'allatszine', 'eltuneshelyszine'];
     
     if (capitalizeFields.includes(e.target.id)) {
@@ -81,7 +81,7 @@ const RegisterThePetIFound = () => {
     const finalDate = date || new Date(); 
     setSelectedDate(finalDate);
     
-    // Format the date as YYYY-MM-DD for storage
+    // Dátum formázása YYYY-MM-DD alakra
     const year = finalDate.getFullYear();
     const month = (finalDate.getMonth() + 1).toString().padStart(2, '0');
     const day = finalDate.getDate().toString().padStart(2, '0');
@@ -95,21 +95,65 @@ const RegisterThePetIFound = () => {
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Fájltípus ellenőrzése
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Csak kép fájlokat lehet feltölteni (JPEG, PNG, GIF)!");
+        return;
+      }
+      
+      // Fájlméret ellenőrzése (10MB max)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.error("A fájl mérete nem lehet nagyobb 10MB-nál!");
+        return;
+      }
+      
       setFile(file);
+      
+      // Előnézet beállítása
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
+  };
+
+  const validateForm = () => {
+    if (!formState.allatfaj) {
+      toast.error("Az állatfaj megadása kötelező!");
+      return false;
+    }
+    
+    if (!formState.eltuneshelyszine) {
+      toast.error("A találat helyszíne megadása kötelező!");
+      return false;
+    }
+    
+    if (!file) {
+      toast.error("Kép feltöltése kötelező!");
+      return false;
+    }
+    
+    return true;
   };
 
   const regAnimal = async (e) => {
     e.preventDefault();
-    if (!file) {
-      toast.error("Kérjük, válassz ki egy képet!");
+    
+    // Teljes form validáció
+    if (!validateForm()) {
       return;
     }
 
-    if (!formState.allatfaj || !formState.eltuneshelyszine) {
-      toast.error("Kérjük, töltsd ki a kötelező mezőket (Állatfaj, Találat Helyszíne)!");
-      return;
-    }
+    toast.info("Adatok feltöltése folyamatban...", {
+      position: "top-right",
+      autoClose: 2500,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true
+    });
 
     const formData = new FormData();
     for (const key in formState) {
@@ -127,39 +171,53 @@ const RegisterThePetIFound = () => {
         body: formData,
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Szerver hiba történt");
+      }
+
       const data = await response.json();
 
       if (data.message === "Sikeres adatfelvitel!") {
         SetRefresh((prev) => !prev);
         
-        // Egyetlen toast üzenet jóváhagyásról
-        toast.success("Bejegyzése jóváhagyásra vár", {
+        // Toast üzenet jóváhagyásról
+        toast.success("Bejegyzése sikeresen elküldve, jóváhagyásra vár", {
           position: "top-right",
-          autoClose: 1500,
+          autoClose: 2500,
           hideProgressBar: false,
           closeOnClick: true,
           pauseOnHover: true,
           draggable: true,
-          onClose: () => navigate("/home") // Toast bezárása után navigálás
+          onClose: () => navigate("/home")
         });
       } else {
-        toast.error(data.error);
+        toast.error(data.error || "Hiba történt a feltöltés során");
       }
     } catch (error) {
-      console.error("Hiba történt az adatküldéskor:", error);
-      toast.error("Hiba történt az adatküldéskor.");
+      toast.error("Hiba történt az adatküldéskor: " + (error.message || error));
     }
   };
 
   const nextStep = () => {
-    if (currentStep === 1 && !formState.allatfaj) {
-      toast.error("Az állatfaj megadása kötelező!");
-      return;
+    // Lépésenkénti validáció
+    if (currentStep === 1) {
+      if (!formState.allatfaj) {
+        toast.error("Az állatfaj megadása kötelező!");
+        return;
+      }
+    } else if (currentStep === 2) {
+      if (!formState.eltuneshelyszine) {
+        toast.error("A találat helyszíne megadása kötelező!");
+        return;
+      }
+    } else if (currentStep === 3) {
+      if (!file) {
+        toast.error("Kép feltöltése kötelező!");
+        return;
+      }
     }
-    if (currentStep === 2 && !formState.eltuneshelyszine) {
-      toast.error("A találat helyszíne megadása kötelező!");
-      return;
-    }
+    
     setCurrentStep(currentStep + 1);
     window.scrollTo(0, 0);
   };
@@ -168,6 +226,21 @@ const RegisterThePetIFound = () => {
     setCurrentStep(currentStep - 1);
     window.scrollTo(0, 0);
   };
+
+  // Egyedi dátumválasztó komponens
+  const CustomInput = React.forwardRef(({ value, onClick }, ref) => (
+    <div className="relative w-full">
+      <FaCalendarAlt className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "text-gray-400" : "text-[#0c4a6e]"} text-lg z-10`} />
+      <input
+        ref={ref}
+        className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base cursor-pointer`}
+        value={value}
+        onClick={onClick}
+        readOnly
+        placeholder="Találat Időpontja"
+      />
+    </div>
+  ));
 
   const renderMobileStep1 = () => (
     <div className="space-y-4">
@@ -321,21 +394,6 @@ const RegisterThePetIFound = () => {
     </div>
   );
 
-  // A dátumválasztó komponens módosítása
-  const CustomInput = React.forwardRef(({ value, onClick }, ref) => (
-    <div className="relative w-full">
-      <FaCalendarAlt className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "text-gray-400" : "text-[#0c4a6e]"} text-lg z-10`} />
-      <input
-        ref={ref}
-        className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base cursor-pointer`}
-        value={value}
-        onClick={onClick}
-        readOnly
-        placeholder="Találat Időpontja"
-      />
-    </div>
-  ));
-
   const renderMobileView = () => (
     <div className={`min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-gray-900" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]"} px-4`}>
       <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} p-6 rounded-xl shadow-lg max-w-md w-full border-2 ${theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"}`}>
@@ -426,7 +484,7 @@ const RegisterThePetIFound = () => {
     </div>
   );
 
-  // Az eredeti asztali nézet megtartása
+  // Asztali nézet
   const renderDesktopView = () => (
     <div className={`pt-20 min-h-screen flex items-center justify-center ${theme === "dark" ? "bg-gray-900" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]"} p-4`}>
       <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} p-6 rounded-3xl shadow-xl w-full max-w-lg border-2 ${theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"}`}>
@@ -436,7 +494,6 @@ const RegisterThePetIFound = () => {
         
         <form onSubmit={regAnimal} className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
-            {/* Állatfaj */}
             <div className="col-span-1">
               <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
                 Állatfaj <span className="text-red-500">*</span>
@@ -455,7 +512,6 @@ const RegisterThePetIFound = () => {
               </div>
             </div>
 
-            {/* Állatkategória */}
             <div className="col-span-1">
               <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
                 Állatkategória
@@ -473,7 +529,6 @@ const RegisterThePetIFound = () => {
               </div>
             </div>
 
-            {/* Dátumválasztó */}
             <div className="col-span-1">
               <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
                 Találat Időpontja
@@ -491,7 +546,6 @@ const RegisterThePetIFound = () => {
               </div>
             </div>
 
-            {/* Kisállat Színe */}
             <div className="col-span-1">
               <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
                 Kisállat Színe
@@ -509,7 +563,6 @@ const RegisterThePetIFound = () => {
               </div>
             </div>
 
-            {/* Kisállat Mérete */}
             <div className="col-span-1">
               <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
                 Kisállat Mérete
@@ -530,7 +583,6 @@ const RegisterThePetIFound = () => {
               </div>
             </div>
 
-            {/* Találat Helyszíne */}
             <div className="col-span-1">
               <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
                 Találat Helyszíne <span className="text-red-500">*</span>
@@ -549,7 +601,6 @@ const RegisterThePetIFound = () => {
               </div>
             </div>
 
-            {/* Egyéb Információk */}
             <div className="col-span-2">
               <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>
                 Egyéb Információk
@@ -567,7 +618,6 @@ const RegisterThePetIFound = () => {
               </div>
             </div>
 
-            {/* Kép feltöltése */}
             <div className="col-span-2">
               <label className={`block text-lg font-medium ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Kép feltöltése <span className="text-red-500">*</span></label>
               <div className="relative w-full">
@@ -592,7 +642,6 @@ const RegisterThePetIFound = () => {
         </form>
       </div>
 
-      {/* Jobb oldali inspiráló szöveg */}
       <div className="hidden xl:flex flex-col justify-center items-center ml-8 w-1/3">
         <div className={`mt-6 text-center p-8 rounded-3xl shadow-xl border-2 ${theme === "dark" ? "bg-gray-800 border-gray-700" : "bg-white bg-opacity-90 border-[#0c4a6e]"} flex flex-col justify-between`} style={{ minHeight: "600px" }}>
           <div>
@@ -641,9 +690,9 @@ const RegisterThePetIFound = () => {
       {isMobile ? renderMobileView() : renderDesktopView()}
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={2500}
         hideProgressBar={false}
-        newestOnTop={false}
+        newestOnTop={true}
         closeOnClick
         rtl={false}
         pauseOnFocusLoss

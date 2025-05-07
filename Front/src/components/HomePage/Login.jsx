@@ -33,10 +33,10 @@ const Login = () => {
   };
 
   const handleToastClose = () => {
-    // Navigálás a főoldalra
+    // Navigálás főoldalra
     navigate('/home');
     
-    // Kis késleltetéssel frissítjük az oldalt, hogy a navbar frissüljön
+    // Oldal frissítése navbar frissítéshez
     setTimeout(() => {
       window.location.reload();
     }, 100);
@@ -55,12 +55,12 @@ const Login = () => {
       const data = await response.json();
       
       if (data.token) {
-        // Token mentése és felhasználó lekérése
+        // Token tárolás és felhasználó adatok lekérése
         localStorage.setItem("usertoken", data.token);
         await getCurrentUser(data.token);
         SetRefresh((prev) => !prev);
         
-        // Sikeres toast üzenet és időzített átirányítás
+        // Sikeres bejelentkezés toast
         toast.success("Sikeres bejelentkezés!", {
           position: "top-right",
           autoClose: 1500,

@@ -13,11 +13,11 @@ const Navbar = () => {
   const [hasPendingPosts, setHasPendingPosts] = useState(false);
   const [pendingCount, setPendingCount] = useState(0);
   const closepanel = useRef(null);
-  const dropdownRef = useRef(null); // Új ref a legördülő menühöz
+  const dropdownRef = useRef(null);
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
-  
-  // Ellenőrizzük, hogy a felhasználó admin-e
+
+  // Admin jogosultság ellenőrzése
   const isAdmin = user?.admin === "true";
 
   useEffect(() => {
@@ -25,7 +25,7 @@ const Navbar = () => {
     document.body.className = theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black";
   }, [theme]);
 
-  // Kattintásfigyelő a legördülő menü bezárásához
+  // Legördülő menü bezárása kívülre kattintáskor
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -41,14 +41,13 @@ const Navbar = () => {
     };
   }, []);
 
-  // Check for notifications with polling
+  // Értesítések ellenőrzése
   useEffect(() => {
-    // Function to check for notifications
     const checkNotifications = async () => {
       if (!token) return;
-      
+
       try {
-        // Check rejected posts
+        // Elutasított posztok ellenőrzése
         const rejectedResponse = await fetch('http://localhost:8000/felhasznalok/rejected-posts', {
           method: 'GET',
           headers: {
@@ -63,7 +62,7 @@ const Navbar = () => {
           setRejectedCount(data.length);
         }
 
-        // Check pending posts - csak admin esetén
+        // Függőben lévő posztok ellenőrzése
         if (isAdmin) {
           const pendingResponse = await fetch('http://localhost:8000/felhasznalok/pending-posts', {
             method: 'GET',
@@ -79,28 +78,27 @@ const Navbar = () => {
             setPendingCount(data.length);
           }
         } else {
-          // Ha nem admin, akkor nincs jóváhagyásra váró poszt értesítés
+          // Nem admin felhasználó esetén
           setHasPendingPosts(false);
           setPendingCount(0);
         }
       } catch (error) {
-        console.error('Error checking notifications:', error);
+        // Hiba értesítések ellenőrzésekor
       }
     };
 
-    // Initial check
+    // Kezdeti ellenőrzés
     if (token) {
       checkNotifications();
     }
 
-    // Set up polling every 10 seconds
+    // Értesítések frissítése időközönként
     const intervalId = setInterval(() => {
       if (token) {
         checkNotifications();
       }
-    }, 10000); // Check every 10 seconds
+    }, 10000);
 
-    // Clean up interval on component unmount or token change
     return () => clearInterval(intervalId);
   }, [token, refresh, isAdmin]);
 
@@ -122,19 +120,19 @@ const Navbar = () => {
 
   const isLoggedIn = !!token;
 
-  // Alapértelmezett kép URL-je
+  // Alapértelmezett kép
   const defaultProfilePicture = "default-profile.jpg";
 
-  // Felhasználó profilképének URL-je
+  // Felhasználó profilképe
   const profilePictureUrl = isLoggedIn && user?.profilePicture
     ? `http://localhost:8000/${user.profilePicture.replace(/\\/g, '/')}?${Date.now()}`
     : defaultProfilePicture;
 
-  // Módosítsuk a notification badge megjelenítési feltételét is
+  // Értesítés badge megjelenítése
   const hasNotifications = hasRejectedPosts || (isAdmin && hasPendingPosts);
   const totalNotifications = rejectedCount + (isAdmin ? pendingCount : 0);
-  
-  // Profilképre kattintás kezelése - navigálás a profiloldalra
+
+  // Navigálás a profiloldalra
   const handleProfileClick = () => {
     navigate('/profilom');
     handleLinkClick();
@@ -146,7 +144,7 @@ const Navbar = () => {
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0">
             <Link to="/home" className="flex items-center">
-            <svg
+              <svg
                 className="h-10 w-auto"
                 viewBox="0 0 370 70"
                 fill={theme === "dark" ? "#fff" : "#111"}
@@ -170,7 +168,6 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Central Menu (for large screens) */}
           <div className="hidden lg:flex items-center space-x-6">
             <Link to="/elveszettallat" className={`${theme === "dark" ? "text-white" : "text-black"} text-lg hover:text-blue-500 transition duration-300`} onClick={handleLinkClick}>
               Elveszett Kisállatom
@@ -186,9 +183,7 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Right Section: Profile Menu and Theme Toggle */}
           <div className="flex items-center">
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="lg:hidden mr-4 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -230,10 +225,9 @@ const Navbar = () => {
             </button>
 
             <div ref={dropdownRef}>
-              {/* For mobile - direct link to profile page */}
               {isLoggedIn ? (
-                <Link 
-                  to="/profilom" 
+                <Link
+                  to="/profilom"
                   className="lg:hidden relative"
                   onClick={handleLinkClick}
                 >
@@ -244,9 +238,8 @@ const Navbar = () => {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  {/* Notification badge - only visible on mobile */}
                   {((isAdmin && pendingCount > 0) || hasRejectedPosts) && (
-                    <div className="absolute -top-1 -right-1">
+                    <div className="absolute -top-2 -right-2">
                       <div className="flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full">
                         {totalNotifications}
                       </div>
@@ -254,18 +247,17 @@ const Navbar = () => {
                   )}
                 </Link>
               ) : (
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition duration-300"
                 >
                   <FaUser className="w-5 h-5" />
                 </Link>
               )}
 
-              {/* For desktop - direct link to profile (no dropdown) */}
               {isLoggedIn ? (
-                <Link 
-                  to="/profilom" 
+                <Link
+                  to="/profilom"
                   className="hidden lg:block relative"
                   onClick={handleLinkClick}
                 >
@@ -276,9 +268,8 @@ const Navbar = () => {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  {/* Notification badge - for desktop */}
                   {((isAdmin && pendingCount > 0) || hasRejectedPosts) && (
-                    <div className="absolute -top-1 -right-1">
+                    <div className="absolute -top-2 -right-2">
                       <div className="flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full">
                         {totalNotifications}
                       </div>
@@ -306,7 +297,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu (Full Screen) */}
       {isMenuOpen && (
         <div className={`lg:hidden fixed top-16 left-0 w-full h-calc-screen z-40 ${theme === "dark" ? "bg-gray-800" : "bg-white"} p-4 transition-all duration-300 ease-in shadow-lg overflow-y-auto`}>
           <div className="flex flex-col space-y-2">

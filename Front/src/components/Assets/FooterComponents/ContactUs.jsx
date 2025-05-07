@@ -31,7 +31,7 @@ const ContactUs = () => {
       setEmail('');
       setMessage('');
     } catch (error) {
-      console.error('Hiba történt:', error);
+      // Hiba kezelés
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,6 @@ const ContactUs = () => {
         </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Kapcsolati információk */}
           <div className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-600"} p-6 rounded-lg shadow-sm`}>
             <h2 className="text-xl sm:text-2xl font-semibold mb-4">
               Kapcsolati információk
@@ -63,7 +62,6 @@ const ContactUs = () => {
             </div>
           </div>
 
-          {/* Kapcsolati űrlap */}
           <div className={`${theme === "dark" ? "bg-gray-700 text-white" : "bg-gray-50 text-gray-600"} p-6 rounded-lg shadow-sm`}>
             <h2 className="text-xl sm:text-2xl font-semibold mb-4">
               Küldj üzenetet

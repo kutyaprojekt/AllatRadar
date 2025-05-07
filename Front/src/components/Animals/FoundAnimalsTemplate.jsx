@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { hu } from 'date-fns/locale';
 import { useTheme } from '../../context/ThemeContext';
@@ -26,10 +26,8 @@ const FoundAnimalsTemplate = ({ animal }) => {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return "Érvénytelen dátum";
             
-            // Use the same formatDate function that's already defined
             return formatDate(dateString);
         } catch (error) {
-            console.error("Dátum formázási hiba:", error);
             return "Érvénytelen dátum";
         }
     };
@@ -41,20 +39,25 @@ const FoundAnimalsTemplate = ({ animal }) => {
 
     const openModal = () => {
         setIsModalOpen(true);
-        document.body.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
     };
 
     const closeModal = () => {
         setIsModalOpen(false);
-        document.body.style.overflow = 'auto';
+        document.body.classList.remove('modal-open');
     };
+
+    useEffect(() => {
+        return () => {
+            document.body.classList.remove('modal-open');
+        };
+    }, []);
 
     return (
         <div className={`${theme === "dark" 
             ? "bg-gray-800 border-gray-700 border-2 shadow-xl shadow-gray-900/40" 
             : "bg-white border border-gray-200"
         } rounded-xl overflow-hidden w-[350px] mx-auto flex flex-col h-full`}>
-            {/* Kép rész */}
             <div className="w-full h-64 overflow-hidden relative">
                 {animal.filePath ? (
                     <img
@@ -79,7 +82,6 @@ const FoundAnimalsTemplate = ({ animal }) => {
                 </div>
             </div>
             
-            {/* Tartalom rész */}
             <div className="p-5 flex flex-col flex-grow">
                 <div className="flex items-center mb-3">
                     <h2 className={`text-xl font-bold flex items-center gap-2 ${
@@ -139,7 +141,6 @@ const FoundAnimalsTemplate = ({ animal }) => {
                 </div>
             </div>
 
-            {/* Teljes történet modal */}
             <Modal
                 isOpen={isModalOpen}
                 onRequestClose={closeModal}

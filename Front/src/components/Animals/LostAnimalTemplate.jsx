@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AnimalDetailsModal from './AnimalDetailsModal';
 import { useTheme } from '../../context/ThemeContext';
 import { FaPaw, FaClock, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
@@ -8,17 +8,25 @@ const LostAnimalTemplate = ({ animal }) => {
     const { theme } = useTheme();
 
     if (!animal || typeof animal !== 'object') {
-        console.error("Invalid animal prop received:", animal);
+        // Érvénytelen állat adat ellenőrzése
         return null;
     }
 
     const handleOpenModal = () => {
         setIsModalOpen(true);
+        document.body.classList.add('modal-open');
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
+        document.body.classList.remove('modal-open');
     };
+
+    useEffect(() => {
+        return () => {
+            document.body.classList.remove('modal-open');
+        };
+    }, []);
 
     const formatElapsedTime = (dateString) => {
         if (!dateString) return "Ismeretlen dátum";
@@ -27,15 +35,13 @@ const LostAnimalTemplate = ({ animal }) => {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return "Érvénytelen dátum";
 
-            // Format the actual date instead of elapsed time
+            // Dátum formázás (YYYY.MM.DD)
             const year = date.getFullYear();
             const month = date.getMonth() + 1;
             const day = date.getDate();
             
-            // Return formatted date (YYYY.MM.DD)
             return `${year}.${month.toString().padStart(2, '0')}.${day.toString().padStart(2, '0')}`;
         } catch (error) {
-            console.error("Dátum formázási hiba:", error);
             return "Érvénytelen dátum";
         }
     };
@@ -47,7 +53,6 @@ const LostAnimalTemplate = ({ animal }) => {
 
     return (
         <div className={`${theme === "dark" ? "bg-gray-800 border-gray-700 border-2" : "bg-white"} rounded-xl shadow-lg overflow-hidden border ${theme === "dark" ? "" : "border-gray-200"} w-[350px] mx-auto flex flex-col h-full`}>
-            {/* Kép rész */}
             <div className="w-full h-64 overflow-hidden relative">
                 {animal.filePath && (
                     <img
@@ -64,7 +69,6 @@ const LostAnimalTemplate = ({ animal }) => {
                 </span>
             </div>
             
-            {/* Tartalom rész */}
             <div className="p-5 flex flex-col flex-grow">
                 <div className="flex items-center mb-3">
                     <h2 className={`text-xl font-bold flex items-center gap-2 ${theme === "dark" ? "text-white" : "text-gray-800"}`}>

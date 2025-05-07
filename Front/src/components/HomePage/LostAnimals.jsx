@@ -21,17 +21,17 @@ const LostAnimals = () => {
             }
         });
         const data = await response.json();
-        
-        // Sort animals by approval status and date - approved animals first, then sorted by date
+
+        // Rendezés jóváhagyás és dátum alapján
         const sortedAnimals = data.sort((a, b) => {
-            // First sort by approval status (approved animals first)
+            // Jóváhagyott állatok előre
             if (a.elutasitva === "false" && b.elutasitva !== "false") return -1;
             if (a.elutasitva !== "false" && b.elutasitva === "false") return 1;
-            
-            // Then sort by date (newest first)
+
+            // Dátum szerinti rendezés (újabbak előre)
             return new Date(b.datum) - new Date(a.datum);
         });
-        
+
         setAnimals(sortedAnimals);
         setFilteredAnimals(sortedAnimals);
     }

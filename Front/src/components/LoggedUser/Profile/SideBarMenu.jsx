@@ -25,15 +25,14 @@ const SideBarMenu = ({ activeTab, setActiveTab, isAdmin }) => {
                         <button
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
-                            className={`w-full flex items-center px-4 py-3 rounded-lg transition-colors ${
-                                activeTab === item.id
+                            className={`w-full flex items-center px-4 py-3 rounded-lg transition-colors ${activeTab === item.id
                                     ? theme === 'dark'
                                         ? 'bg-[#1A73E8] text-white'
                                         : 'bg-[#1A73E8] text-white'
                                     : theme === 'dark'
                                         ? 'text-gray-300 hover:bg-gray-700'
                                         : 'text-gray-600 hover:bg-gray-100'
-                            }`}
+                                }`}
                         >
                             <span className="mr-3">{item.icon}</span>
                             {item.label}

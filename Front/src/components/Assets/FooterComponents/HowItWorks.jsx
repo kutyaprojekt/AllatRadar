@@ -7,7 +7,6 @@ const HowItWorks = () => {
 
     return (
         <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe] text-[#073F48]"} min-h-screen pt-16`}>
-            {/* Hero Section */}
             <div className={`${theme === "dark" ? "bg-gray-800" : "bg-gradient-to-r from-[#64B6FF] to-[#A7D8FF]"} text-white py-12 md:py-32 relative overflow-hidden`}>
                 <div className="container mx-auto px-4 text-center relative z-10">
                     <h1 className="text-3xl md:text-6xl font-bold mb-4">Hogyan Működik az ÁllatRadar?</h1>
@@ -17,11 +16,9 @@ const HowItWorks = () => {
                 </div>
             </div>
 
-            {/* How It Works Section */}
             <div className="container mx-auto px-4 py-8 md:py-20">
                 <h2 className={`text-2xl md:text-4xl font-bold text-center ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-6 md:mb-16`}>Három Egyszerű Lépésben</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Step 1 */}
                     <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} p-6 rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105`}>
                         <div className="text-center mb-4">
                             <span className={`${theme === "dark" ? "text-white" : "text-[#073F48]"} text-4xl font-bold`}>1</span>
@@ -32,7 +29,6 @@ const HowItWorks = () => {
                         </p>
                     </div>
 
-                    {/* Step 2 */}
                     <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} p-6 rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105`}>
                         <div className="text-center mb-4">
                             <span className={`${theme === "dark" ? "text-white" : "text-[#073F48]"} text-4xl font-bold`}>2</span>
@@ -43,7 +39,6 @@ const HowItWorks = () => {
                         </p>
                     </div>
 
-                    {/* Step 3 */}
                     <div className={`${theme === "dark" ? "bg-gray-800" : "bg-white"} p-6 rounded-2xl shadow-xl transition-transform duration-300 hover:scale-105`}>
                         <div className="text-center mb-4">
                             <span className={`${theme === "dark" ? "text-white" : "text-[#073F48]"} text-4xl font-bold`}>3</span>
@@ -56,7 +51,6 @@ const HowItWorks = () => {
                 </div>
             </div>
 
-            {/* CTA Section */}
             <div className={`${theme === "dark" ? "bg-gradient-to-r from-gray-800 to-gray-900" : "bg-gradient-to-r from-[#64B6FF] to-[#A7D8FF]"} py-12 md:py-24`}>
                 <div className="container mx-auto px-4 text-center">
                     <h2 className={`text-2xl md:text-4xl font-bold mb-4 ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>Csatlakozz Most!</h2>

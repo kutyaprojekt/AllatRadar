@@ -4,13 +4,12 @@ const Footer = () => {
   return (
     <footer className="bg-gray-800 text-white py-12">
       <div className="container mx-auto px-4">
-        {/* Logo és Rövid Leírás */}
         <div className="text-center mb-8">
           <div className="flex justify-center">
             <svg
               className="h-10 w-auto"
               viewBox="0 0 370 70"
-              fill="#fff"  // Fehér szín
+              fill="#fff"
               xmlns="http://www.w3.org/2000/svg"
             >
               <g transform="matrix(0.7777792942406351,0,0,0.7777792942406351,-3.8887362536056376,-3.8888489993224233)" fill="#fff">
@@ -32,9 +31,7 @@ const Footer = () => {
           <p className="text-gray-400">Segítünk az elveszett háziállatok gyors és hatékony visszakerülésében.</p>
         </div>
 
-        {/* Linkek és Információk */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
-          {/* Gyors Linkek */}
           <div>
             <h3 className="text-lg font-bold mb-4">Gyors Linkek</h3>
             <ul className="space-y-2">
@@ -45,7 +42,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Kapcsolat */}
           <div>
             <h3 className="text-lg font-bold mb-4">Kapcsolat</h3>
             <p className="text-gray-400">Email: info@allatradar.hu</p>
@@ -53,7 +49,6 @@ const Footer = () => {
             <p className="text-gray-400">Cím: 1234 Budapest, Állatkereső utca 1.</p>
           </div>
 
-          {/* Közösségi Média */}
           <div>
             <h3 className="text-lg font-bold mb-4">Kövess Minket</h3>
             <div className="flex justify-center md:justify-start space-x-4">
@@ -76,7 +71,6 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Copyright és További Információk */}
         <div className="text-center mt-8 border-t border-gray-700 pt-8">
           <p className="text-gray-400">© 2025 Állatkereső és -megtaláló Rendszer. Minden jog fenntartva.</p>
           <p className="text-gray-400">Készítette: Sóki Zalán, Páskuj Csaba,  Bodrogi Zétény</p>

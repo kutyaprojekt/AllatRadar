@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
 
 const MyProfileTemplate = ({ user, onLogout }) => {
-    // Biztosítsuk, hogy van érvényes felhasználói adat
+    // Érvényes felhasználói adat ellenőrzés
     if (!user || !user.id) {
         return (
             <div className="min-h-screen flex items-center justify-center">
@@ -18,7 +18,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
             </div>
         );
     }
-    
+
     const { refresh, SetRefresh } = useContext(UserContext);
     const { theme } = useTheme();
     const navigate = useNavigate();
@@ -48,11 +48,11 @@ const MyProfileTemplate = ({ user, onLogout }) => {
         const handleResize = () => {
             setIsMobile(window.innerWidth < 768);
         };
-        
+
         window.addEventListener('resize', handleResize);
         return () => {
             window.removeEventListener('resize', handleResize);
-            // Cleanup preview URL when component unmounts
+            // Preview URL felszabadítás
             if (previewImage) {
                 URL.revokeObjectURL(previewImage);
             }
@@ -70,13 +70,13 @@ const MyProfileTemplate = ({ user, onLogout }) => {
             return;
         }
 
-        // Ellenőrizzük a fájl méretét (max 5MB)
+        // Fájlméret ellenőrzés (5MB)
         if (file.size > 5 * 1024 * 1024) {
             toast.error('A kép mérete nem lehet nagyobb 5MB-nál!');
             return;
         }
 
-        // Ellenőrizzük a fájl típusát
+        // Fájltípus ellenőrzés
         if (!file.type.startsWith('image/')) {
             toast.error('Csak képfájlok tölthetők fel!');
             return;
@@ -87,7 +87,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
             URL.revokeObjectURL(previewImage);
         }
 
-        // Új preview létrehozása
+        // Preview létrehozás
         const previewUrl = URL.createObjectURL(file);
         setPreviewImage(previewUrl);
         setUploadedFile(file);
@@ -111,7 +111,6 @@ const MyProfileTemplate = ({ user, onLogout }) => {
             SetRefresh((prev) => !prev);
             toast.success('Profilkép törölve');
         } catch (error) {
-            console.error('Hiba történt:', error);
             toast.error('Hiba történt a kép törlése során.');
         }
     };
@@ -148,7 +147,6 @@ const MyProfileTemplate = ({ user, onLogout }) => {
             setPasswordError('');
             toast.success('Jelszó frissítve');
         } catch (error) {
-            console.error('Hiba történt:', error);
             toast.error(error.message || 'Hiba történt a jelszó módosítása során!');
         }
     };
@@ -177,18 +175,18 @@ const MyProfileTemplate = ({ user, onLogout }) => {
 
                 const uploadData = await uploadResponse.json();
                 setProfilePicture(uploadData.filePath);
-                // Preview törlése sikeres feltöltés után
+
                 if (previewImage) {
                     URL.revokeObjectURL(previewImage);
                     setPreviewImage(null);
                 }
                 changes.push('profilkép');
-                
+
                 toast.success('Profilkép sikeresen frissítve!');
                 SetRefresh((prev) => !prev);
             }
 
-            // Ellenőrizzük, hogy változott-e valamelyik adat
+            // Adatok változásának ellenőrzése
             const emailChanged = newEmail !== email;
             const nameChanged = newName !== name;
 
@@ -212,12 +210,12 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                 }
 
                 const data = await response.json();
-                
+
                 if (nameChanged) {
                     changes.push('felhasználónév');
                     toast.success('Felhasználónév frissítve');
                 }
-                
+
                 if (emailChanged) {
                     changes.push('email');
                     toast.success('Email cím frissítve');
@@ -230,33 +228,29 @@ const MyProfileTemplate = ({ user, onLogout }) => {
             }
 
             setUploadedFile(null);
-            
+
             if (changes.length === 0) {
                 toast.info('Nem történt változás');
             }
         } catch (error) {
-            console.error('Hiba történt:', error);
             toast.error(error.message || 'Hiba történt a profil frissítése során.');
         }
     };
 
-    // Profilkép URL-je - módosítjuk, hogy a preview-t is figyelembe vegye
-    const profilePictureUrl = previewImage || (user.profilePicture 
+    // Profilkép URL-je
+    const profilePictureUrl = previewImage || (user.profilePicture
         ? `http://localhost:8000/${user.profilePicture.replace(/\\/g, '/')}?${Date.now()}`
         : defaultProfilePicture);
-        
-    // Kijelentkezés kezelése
+
+    // Kijelentkezés
     const handleLogout = () => {
         if (onLogout) {
-            // Ha a szülő átadott logout függvényt, használjuk azt
             onLogout();
         } else {
-            // Fallback a saját logout funkcióra
             localStorage.removeItem("usertoken");
             localStorage.removeItem("user");
             SetRefresh((prev) => !prev);
-            
-            // Toast üzenet megjelenítése és akkor navigálunk amikor ténylegesen bezárul
+
             toast.success("Sikeresen kijelentkeztél!", {
                 position: "top-right",
                 autoClose: 1500,
@@ -276,17 +270,16 @@ const MyProfileTemplate = ({ user, onLogout }) => {
         <div className={`min-h-screen pt-16 ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
             <div className="container mx-auto px-4 py-8">
                 <div className="flex flex-col md:flex-row gap-6">
-                    {/* Oldalsáv menü - a SideBarMenu komponens mobile-sensitive most */}
+                    {/* Oldalsáv menü */}
                     <SideBarMenu isAdmin={isAdmin} activeTab={activeTab} setActiveTab={setActiveTab} />
 
-                    {/* Fő tartalom */}
                     <div className="flex-1">
                         <div className={`${theme === 'dark' ? 'bg-gray-800' : 'bg-white'} rounded-xl shadow-md p-6 mb-6`}>
                             <h2 className={`text-2xl font-bold mb-6 ${theme === 'dark' ? 'text-white' : 'text-[#073F48]'}`}>
                                 Profilom
                             </h2>
 
-                            {/* Profil kép szekció - mobilra optimalizált */}
+                            {/* Profil kép szekció */}
                             <div className="flex flex-col md:flex-row md:items-center mb-8">
                                 <div className="relative mb-4 md:mb-0 md:mr-6 flex justify-center">
                                     <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-blue-500 shadow-lg">
@@ -336,8 +329,6 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                 </div>
                             </div>
 
-                          
-                            {/* Responsive form card design */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {/* Név szekció */}
                                 <div className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'} p-4 rounded-lg shadow-sm`}>
@@ -353,7 +344,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                             {isEditingName ? 'Mégse' : 'Szerkesztés'}
                                         </button>
                                     </div>
-                                    
+
                                     {isEditingName ? (
                                         <div className="mt-2">
                                             <div className="relative">
@@ -394,7 +385,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                             {isEditingEmail ? 'Mégse' : 'Szerkesztés'}
                                         </button>
                                     </div>
-                                    
+
                                     {isEditingEmail ? (
                                         <div className="mt-2">
                                             <div className="relative">
@@ -435,7 +426,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                             {isEditingPassword ? 'Mégse' : 'Jelszó módosítása'}
                                         </button>
                                     </div>
-                                    
+
                                     {isEditingPassword && (
                                         <div className="mt-2 space-y-3">
                                             <div className="relative">
@@ -455,7 +446,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                                                 </button>
                                             </div>
-                                            
+
                                             <div className="relative">
                                                 <FaLock className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
                                                 <input
@@ -466,7 +457,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                                     placeholder="Új jelszó"
                                                 />
                                             </div>
-                                            
+
                                             <div className="relative">
                                                 <FaLock className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} />
                                                 <input
@@ -477,11 +468,11 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                                     placeholder="Új jelszó megerősítése"
                                                 />
                                             </div>
-                                            
+
                                             {passwordError && (
                                                 <p className="text-red-500 text-sm">{passwordError}</p>
                                             )}
-                                            
+
                                             <button
                                                 onClick={handlePasswordChange}
                                                 className="mt-3 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 w-full flex items-center justify-center"
@@ -490,7 +481,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                             </button>
                                         </div>
                                     )}
-                                    
+
                                     {!isEditingPassword && (
                                         <p className={`${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'} py-2`}>
                                             ********
@@ -498,7 +489,7 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                                     )}
                                 </div>
 
-                                {/* Kijelentkezés doboz - az oldal alján könnyű elérhetőséggel */}
+                                {/* Kijelentkezés doboz */}
                                 <div className={`${theme === 'dark' ? 'bg-gray-700' : 'bg-gray-50'} p-6 rounded-lg shadow-sm md:col-span-2 mt-6`}>
                                     <div className="flex flex-col items-center justify-center">
                                         <button
@@ -518,8 +509,8 @@ const MyProfileTemplate = ({ user, onLogout }) => {
                     </div>
                 </div>
             </div>
-            
-            <ToastContainer 
+
+            <ToastContainer
                 position="top-right"
                 autoClose={5000}
                 hideProgressBar={false}

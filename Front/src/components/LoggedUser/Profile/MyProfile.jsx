@@ -12,58 +12,51 @@ const MyProfile = () => {
   const [localLoading, setLocalLoading] = useState(true);
   const token = localStorage.getItem("usertoken");
   const navigate = useNavigate();
-  
-  // Kijelentkezés kezelése a szülő komponensben
+
+  // Kijelentkezés kezelés
   const handleLogout = () => {
     localStorage.removeItem("usertoken");
     localStorage.removeItem("user");
     SetRefresh((prev) => !prev);
     toast.success("Sikeresen kijelentkeztél!");
-    
-    // Rövid késleltetés után navigálás és oldal frissítése
+
+    // Navigálás késleltetéssel
     setTimeout(() => {
       navigate("/home");
       window.location.reload();
     }, 1000);
   };
-  
-  // Scroll to top when component mounts
+
+  // Oldal tetejére görgetés
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-  
-  // Csak egyszer futtassuk le az első rendereléskor vagy ha szükség van újratöltésre
+
+  // Felhasználói adatok betöltése
   useEffect(() => {
-    
     const loadUserData = async () => {
       if (!token) {
         setLocalLoading(false);
         return;
       }
-      
+
       try {
         if (getCurrentUser && (!user || !user.id)) {
-          const userData = await getCurrentUser(token);
+          await getCurrentUser(token);
         }
       } catch (error) {
+        // Hiba kezelés
       } finally {
         setLocalLoading(false);
       }
     };
 
     loadUserData();
-    
-    return () => {
-    };
-  }, []); // Üres függőségek tömbje - csak egyszer fut le
+  }, []);
 
-  // Külön effect a felhasználó jelenlétének ellenőrzésére
-  useEffect(() => {
-  }, [user]);
-
-  // A tényleges loading állapot a helyi és a kontextus loading állapotok kombinációja
+  // Kombinált betöltési állapot
   const isLoading = localLoading || contextLoading;
-  
+
   if (isLoading) {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
@@ -76,7 +69,7 @@ const MyProfile = () => {
     return (
       <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-gray-900' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]'}`}>
         <div className="text-2xl font-bold text-red-500">Nem sikerült betölteni a profil adatokat.</div>
-        <ToastContainer 
+        <ToastContainer
           position="top-right"
           autoClose={3000}
           hideProgressBar={false}

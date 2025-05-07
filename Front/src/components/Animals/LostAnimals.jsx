@@ -23,27 +23,27 @@ const LostAnimals = () => {
             }
 
             const data = await response.json();
-            const validAnimals = data.filter(animal => 
-                animal && 
-                animal.id && 
-                animal.allatfaj && 
+            const validAnimals = data.filter(animal =>
+                animal &&
+                animal.id &&
+                animal.allatfaj &&
                 typeof animal.allatfaj === 'string' &&
                 animal.elutasitva !== true
             );
-            
-            // Sort animals by approval status and date - approved animals first, then sorted by date
+
+            // Állatok rendezése jóváhagyás és dátum szerint
             const sortedAnimals = validAnimals.sort((a, b) => {
-                // First sort by approval status (approved animals first)
+                // Először jóváhagyott állatok
                 if (a.elutasitva === "false" && b.elutasitva !== "false") return -1;
                 if (a.elutasitva !== "false" && b.elutasitva === "false") return 1;
-                
-                // Then sort by date (newest first)
+
+                // Majd dátum szerint (újabb először)
                 return new Date(b.datum) - new Date(a.datum);
             });
-            
+
             setAnimals(sortedAnimals);
         } catch (error) {
-            console.error("Hiba történt az állatok betöltése során:", error);
+            // Hiba kezelése
         } finally {
             setIsLoading(false);
         }
@@ -54,7 +54,7 @@ const LostAnimals = () => {
         window.scrollTo(0, 0);
     }, []);
 
-    const filteredAnimals = animals.filter(animal => 
+    const filteredAnimals = animals.filter(animal =>
         animal.allatfaj.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (animal.leiras && animal.leiras.toLowerCase().includes(searchTerm.toLowerCase()))
     );
@@ -62,7 +62,6 @@ const LostAnimals = () => {
     return (
         <div className={`min-h-screen pt-28 pb-12 px-4 sm:px-6 lg:px-8 ${theme === 'dark' ? 'bg-gray-900 text-white' : 'bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe] text-[#0c4a6e]'}`}>
             <div className="max-w-7xl mx-auto">
-                {/* Fejléc rész */}
                 <div className="text-center mb-10">
                     <h1 className="text-4xl font-extrabold sm:text-5xl mb-4">
                         <span className={theme === 'dark' ? 'text-white' : 'text-[#075985]'}>Elveszett </span>
@@ -72,8 +71,7 @@ const LostAnimals = () => {
                         Segíts, hogy visszakerüljenek a gazdájukhoz
                     </p>
                 </div>
-                
-                {/* Kereső mező */}
+
                 <div className="max-w-2xl mx-auto mb-8 px-4">
                     <div className="relative shadow-lg rounded-xl">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -91,7 +89,6 @@ const LostAnimals = () => {
                     </div>
                 </div>
 
-                {/* Betöltés állapota */}
                 {isLoading ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="flex flex-col items-center">
@@ -101,7 +98,6 @@ const LostAnimals = () => {
                     </div>
                 ) : (
                     <>
-                        {/* Találatok száma és szűrők */}
                         <div className="flex justify-between items-center mb-6 px-2">
                             <div>
                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${theme === 'dark' ? 'bg-gray-800 text-cyan-400' : 'bg-white text-cyan-700 shadow-sm'}`}>
@@ -118,7 +114,6 @@ const LostAnimals = () => {
                             </div>
                         </div>
 
-                        {/* Állatok listája */}
                         {filteredAnimals.length > 0 ? (
                             <div className="w-full">
                                 <div className="flex flex-wrap justify-center gap-6">
@@ -138,7 +133,7 @@ const LostAnimals = () => {
                                 <p className={`mt-2 max-w-md mx-auto ${theme === 'dark' ? 'text-cyan-200' : 'text-cyan-700'}`}>
                                     Próbálj meg más kulcsszavakat használni a kereséshez
                                 </p>
-                                <button 
+                                <button
                                     onClick={() => setSearchTerm('')}
                                     className={`mt-4 px-4 py-2 rounded-lg font-medium transition-all ${theme === 'dark' ? 'bg-cyan-600 hover:bg-cyan-500 text-white' : 'bg-cyan-100 hover:bg-cyan-200 text-cyan-800'}`}
                                 >
