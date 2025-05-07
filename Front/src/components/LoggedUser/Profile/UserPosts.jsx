@@ -114,23 +114,11 @@ const UserPosts = () => {
             await adminornot();
             await loadAnimals();
         };
-
         fetchData();
-        
-        // Beállítunk egy intervallumot a frissítéshez
-        const interval = setInterval(() => {
-            checkRejectedPosts();
-        }, 5000); // 5 másodpercenként ellenőrizzük az elutasított posztokat
-        
-        return () => clearInterval(interval);
-    }, [refresh]);
+    }, []);
 
     const handlePostUpdate = async () => {
-        // Állatok újratöltése
         await loadAnimals();
-
-        // Kontextus frissítése
-        SetRefresh(prev => !prev);
     };
 
     useEffect(() => {
@@ -155,19 +143,6 @@ const UserPosts = () => {
 
     return (
         <div className={`min-h-screen ${theme === "dark" ? "bg-gray-900" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe]"}`}>
-            <ToastContainer 
-                position="top-right"
-                autoClose={2500}
-                hideProgressBar={false}
-                newestOnTop={true}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss={false}
-                pauseOnHover={false}
-                draggable
-                theme={theme === "dark" ? "dark" : "light"}
-                className="z-50"
-            />
             <div className="container mx-auto px-4 pt-24 pb-12 flex flex-col md:flex-row gap-8">
                 {/* Oldalsáv menü */}
                 <SideBarMenu

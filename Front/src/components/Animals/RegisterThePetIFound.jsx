@@ -17,6 +17,10 @@ const RegisterThePetIFound = () => {
   // Űrlap lépések és mobil eszköz detektálás
   const [currentStep, setCurrentStep] = useState(1);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
+  // Hibakezeléshez állapotok
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   let formObj = {
     talaltvagyelveszett: "talalt",
@@ -56,23 +60,34 @@ const RegisterThePetIFound = () => {
   }, [theme]);
 
   const writeData = (e) => {
+    const { id, value } = e.target;
+    
     // Mezők ahol a szavak első betűje nagybetűs
     const capitalizeFields = ['allatfaj', 'allatkategoria', 'allatneme', 'allatszine', 'eltuneshelyszine'];
     
-    if (capitalizeFields.includes(e.target.id)) {
-      const capitalizedValue = e.target.value
+    // Érték módosítása és hibák törlése a mezőhöz
+    if (capitalizeFields.includes(id)) {
+      const capitalizedValue = value
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
       
-      setFormState((prevState) => ({
+      setFormState(prevState => ({
         ...prevState,
-        [e.target.id]: capitalizedValue,
+        [id]: capitalizedValue,
       }));
     } else {
-      setFormState((prevState) => ({
+      setFormState(prevState => ({
         ...prevState,
-        [e.target.id]: e.target.value,
+        [id]: value,
+      }));
+    }
+    
+    // Hibák törlése, ha a felhasználó kitölti a mezőt
+    if (value.trim() !== '') {
+      setErrors(prev => ({
+        ...prev,
+        [id]: undefined
       }));
     }
   };
@@ -90,52 +105,121 @@ const RegisterThePetIFound = () => {
       ...prev,
       mikorveszettel: `${year}-${month}-${day}`
     }));
+    
+    // Hiba törlése a dátum mezőhöz
+    setErrors(prev => ({
+      ...prev,
+      mikorveszettel: undefined
+    }));
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const selectedFile = e.target.files[0];
+    
+    if (selectedFile) {
       // Fájltípus ellenőrzése
       const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
-      if (!validTypes.includes(file.type)) {
-        toast.error("Csak kép fájlokat lehet feltölteni (JPEG, PNG, GIF)!");
+      if (!validTypes.includes(selectedFile.type)) {
+        setErrors(prev => ({
+          ...prev,
+          file: "Csak kép fájlokat lehet feltölteni (JPEG, PNG, GIF)!"
+        }));
         return;
       }
       
       // Fájlméret ellenőrzése (10MB max)
-      if (file.size > 10 * 1024 * 1024) {
-        toast.error("A fájl mérete nem lehet nagyobb 10MB-nál!");
+      if (selectedFile.size > 10 * 1024 * 1024) {
+        setErrors(prev => ({
+          ...prev,
+          file: "A fájl mérete nem lehet nagyobb 10MB-nál!"
+        }));
         return;
       }
       
-      setFile(file);
+      setFile(selectedFile);
+      setErrors(prev => ({
+        ...prev,
+        file: undefined
+      }));
       
       // Előnézet beállítása
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreview(reader.result);
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(selectedFile);
     }
   };
 
   const validateForm = () => {
-    if (!formState.allatfaj) {
-      toast.error("Az állatfaj megadása kötelező!");
-      return false;
+    const newErrors = {};
+    
+    // Kötelező mezők ellenőrzése
+    if (!formState.allatfaj.trim()) {
+      newErrors.allatfaj = "Az állatfaj megadása kötelező!";
     }
     
-    if (!formState.eltuneshelyszine) {
-      toast.error("A találat helyszíne megadása kötelező!");
-      return false;
+    if (!formState.eltuneshelyszine.trim()) {
+      newErrors.eltuneshelyszine = "A találat helyszíne megadása kötelező!";
     }
     
     if (!file) {
-      toast.error("Kép feltöltése kötelező!");
-      return false;
+      newErrors.file = "Kép feltöltése kötelező!";
     }
     
-    return true;
+    // További validációk
+    if (formState.allatfaj.trim().length < 2) {
+      newErrors.allatfaj = "Az állatfaj neve legalább 2 karakter hosszú legyen!";
+    }
+    
+    if (formState.eltuneshelyszine.trim().length < 3) {
+      newErrors.eltuneshelyszine = "A helyszín megadása részletesebb kell legyen!";
+    }
+    
+    // Hibák beállítása
+    setErrors(newErrors);
+    
+    // Igaz, ha nincs hiba
+    return Object.keys(newErrors).length === 0;
+  };
+
+  // Csak az aktuális lépést validálja
+  const validateStep = (step) => {
+    const newErrors = {};
+    
+    if (step === 1) {
+      if (!formState.allatfaj.trim()) {
+        newErrors.allatfaj = "Az állatfaj megadása kötelező!";
+      } else if (formState.allatfaj.trim().length < 2) {
+        newErrors.allatfaj = "Az állatfaj neve legalább 2 karakter hosszú legyen!";
+      }
+      
+      // Dátum ellenőrzése
+      const today = new Date();
+      const selectedDateObj = new Date(formState.mikorveszettel);
+      
+      if (selectedDateObj > today) {
+        newErrors.mikorveszettel = "A dátum nem lehet jövőbeli!";
+      }
+    } 
+    else if (step === 2) {
+      if (!formState.eltuneshelyszine.trim()) {
+        newErrors.eltuneshelyszine = "A találat helyszíne megadása kötelező!";
+      } else if (formState.eltuneshelyszine.trim().length < 3) {
+        newErrors.eltuneshelyszine = "A helyszín részletesebb megadása szükséges!";
+      }
+    } 
+    else if (step === 3) {
+      if (!file) {
+        newErrors.file = "Kép feltöltése kötelező!";
+      }
+    }
+    
+    // Hibák beállítása
+    setErrors(newErrors);
+    
+    // Igaz, ha nincs hiba
+    return Object.keys(newErrors).length === 0;
   };
 
   const regAnimal = async (e) => {
@@ -143,8 +227,19 @@ const RegisterThePetIFound = () => {
     
     // Teljes form validáció
     if (!validateForm()) {
+      toast.error("Kérjük javítsd a hibákat az űrlapon!", {
+        position: "top-right",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true
+      });
       return;
     }
+
+    // Beállítjuk a küldés állapotot
+    setIsSubmitting(true);
 
     toast.info("Adatok feltöltése folyamatban...", {
       position: "top-right",
@@ -156,10 +251,12 @@ const RegisterThePetIFound = () => {
     });
 
     const formData = new FormData();
+    // Űrlap adatok hozzáadása
     for (const key in formState) {
       formData.append(key, formState[key]);
     }
 
+    // Kép hozzáadása
     formData.append("file", file);
 
     try {
@@ -171,6 +268,7 @@ const RegisterThePetIFound = () => {
         body: formData,
       });
 
+      // HTTP státusz ellenőrzése
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || "Szerver hiba történt");
@@ -195,27 +293,36 @@ const RegisterThePetIFound = () => {
         toast.error(data.error || "Hiba történt a feltöltés során");
       }
     } catch (error) {
-      toast.error("Hiba történt az adatküldéskor: " + (error.message || error));
+      // Részletes hibaüzenet formázása
+      let errorMessage = "Hiba történt az adatküldéskor";
+      
+      if (error.message) {
+        if (error.message.includes("Network")) {
+          errorMessage = "Nincs internet kapcsolat! Kérjük ellenőrizd a hálózatot.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
+      toast.error(errorMessage, {
+        position: "top-right",
+        autoClose: 2500,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: true
+      });
+    } finally {
+      // Küldés állapot visszaállítása minden esetben
+      setIsSubmitting(false);
     }
   };
 
   const nextStep = () => {
-    // Lépésenkénti validáció
-    if (currentStep === 1) {
-      if (!formState.allatfaj) {
-        toast.error("Az állatfaj megadása kötelező!");
-        return;
-      }
-    } else if (currentStep === 2) {
-      if (!formState.eltuneshelyszine) {
-        toast.error("A találat helyszíne megadása kötelező!");
-        return;
-      }
-    } else if (currentStep === 3) {
-      if (!file) {
-        toast.error("Kép feltöltése kötelező!");
-        return;
-      }
+    // Aktuális lépés validálása
+    if (!validateStep(currentStep)) {
+      // Ha a lépés nem valid, akkor mutatjuk a hibákat és nem lépünk tovább
+      return;
     }
     
     setCurrentStep(currentStep + 1);
@@ -227,13 +334,28 @@ const RegisterThePetIFound = () => {
     window.scrollTo(0, 0);
   };
 
-  // Egyedi dátumválasztó komponens
-  const CustomInput = React.forwardRef(({ value, onClick }, ref) => (
+  // Hibamegjelenítő komponens (újrafelhasználható)
+  const ErrorMessage = ({ error }) => {
+    if (!error) return null;
+    
+    return (
+      <p className="text-red-500 text-sm mt-1">
+        {error}
+      </p>
+    );
+  };
+
+  // Egyedi dátumválasztó komponens frissítése hibajelzéssel
+  const CustomInput = React.forwardRef(({ value, onClick, hasError }, ref) => (
     <div className="relative w-full">
       <FaCalendarAlt className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "text-gray-400" : "text-[#0c4a6e]"} text-lg z-10`} />
       <input
         ref={ref}
-        className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base cursor-pointer`}
+        className={`w-full pl-10 pr-3 py-2 border-2 ${
+          hasError ? "border-red-500" : theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"
+        } ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${
+          hasError ? "focus:ring-red-500" : theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"
+        } text-base cursor-pointer`}
         value={value}
         onClick={onClick}
         readOnly
@@ -255,11 +377,16 @@ const RegisterThePetIFound = () => {
             type="text"
             value={formState.allatfaj}
             onChange={writeData}
-            className={`w-full pl-10 pr-3 py-3 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base transition-all duration-200 hover:border-opacity-80`}
+            className={`w-full pl-10 pr-3 py-3 border-2 ${
+              errors.allatfaj ? "border-red-500" : theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"
+            } ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${
+              errors.allatfaj ? "focus:ring-red-500" : theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"
+            } text-base transition-all duration-200 hover:border-opacity-80`}
             placeholder="Állatfaj"
             required
           />
         </div>
+        <ErrorMessage error={errors.allatfaj} />
       </div>
 
       <div>
@@ -273,10 +400,13 @@ const RegisterThePetIFound = () => {
             type="text"
             value={formState.allatkategoria}
             onChange={writeData}
-            className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg`}
+            className={`w-full pl-10 pr-3 py-2 border-2 ${
+              errors.allatkategoria ? "border-red-500" : theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"
+            } ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-[#073F48]"} rounded-lg`}
             placeholder="Állatkategória"
           />
         </div>
+        <ErrorMessage error={errors.allatkategoria} />
       </div>
 
       <div>
@@ -287,13 +417,14 @@ const RegisterThePetIFound = () => {
           <DatePicker
             selected={selectedDate}
             onChange={handleDateChange}
-            customInput={<CustomInput />}
+            customInput={<CustomInput hasError={!!errors.mikorveszettel} />}
             dateFormat="yyyy-MM-dd"
             maxDate={new Date()}
             className="w-full"
             wrapperClassName="w-full block"
           />
         </div>
+        <ErrorMessage error={errors.mikorveszettel} />
       </div>
     </div>
   );
@@ -311,10 +442,15 @@ const RegisterThePetIFound = () => {
             type="text"
             value={formState.allatszine}
             onChange={writeData}
-            className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base`}
+            className={`w-full pl-10 pr-3 py-2 border-2 ${
+              errors.allatszine ? "border-red-500" : theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"
+            } ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${
+              errors.allatszine ? "focus:ring-red-500" : theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"
+            } text-base`}
             placeholder="Kisállat színe"
           />
         </div>
+        <ErrorMessage error={errors.allatszine} />
       </div>
 
       <div>
@@ -327,7 +463,11 @@ const RegisterThePetIFound = () => {
             id="allatmerete"
             value={formState.allatmerete}
             onChange={writeData}
-            className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base`}
+            className={`w-full pl-10 pr-3 py-2 border-2 ${
+              errors.allatmerete ? "border-red-500" : theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"
+            } ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${
+              errors.allatmerete ? "focus:ring-red-500" : theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"
+            } text-base`}
           >
             <option value="">Válassz méretet</option>
             <option value="kicsi">Kicsi (0-30cm)</option>
@@ -335,6 +475,7 @@ const RegisterThePetIFound = () => {
             <option value="nagy">Nagy (60-100cm)</option>
           </select>
         </div>
+        <ErrorMessage error={errors.allatmerete} />
       </div>
 
       <div>
@@ -348,11 +489,16 @@ const RegisterThePetIFound = () => {
             type="text"
             value={formState.eltuneshelyszine}
             onChange={writeData}
-            className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base`}
+            className={`w-full pl-10 pr-3 py-2 border-2 ${
+              errors.eltuneshelyszine ? "border-red-500" : theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"
+            } ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${
+              errors.eltuneshelyszine ? "focus:ring-red-500" : theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"
+            } text-base`}
             placeholder="Találat helyszíne"
             required
           />
         </div>
+        <ErrorMessage error={errors.eltuneshelyszine} />
       </div>
     </div>
   );
@@ -369,11 +515,16 @@ const RegisterThePetIFound = () => {
             id="egyeb_infok"
             value={formState.egyeb_infok}
             onChange={writeData}
-            className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base resize-none`}
+            className={`w-full pl-10 pr-3 py-2 border-2 ${
+              errors.egyeb_infok ? "border-red-500" : theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"
+            } ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${
+              errors.egyeb_infok ? "focus:ring-red-500" : theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"
+            } text-base resize-none`}
             placeholder="További információk..."
             rows="2"
           />
         </div>
+        <ErrorMessage error={errors.egyeb_infok} />
       </div>
 
       <div>
@@ -385,11 +536,26 @@ const RegisterThePetIFound = () => {
           <input
             type="file"
             onChange={handleFileChange}
-            className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base`}
+            className={`w-full pl-10 pr-3 py-2 border-2 ${
+              errors.file ? "border-red-500" : theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"
+            } ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${
+              errors.file ? "focus:ring-red-500" : theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"
+            } text-base`}
             accept="image/*"
             required
           />
         </div>
+        <ErrorMessage error={errors.file} />
+        
+        {/* Kép előnézet */}
+        {preview && (
+          <div className="mt-4">
+            <p className="text-sm mb-2">Előnézet:</p>
+            <div className="border-2 border-gray-300 rounded-lg overflow-hidden h-48">
+              <img src={preview} alt="Előnézet" className="w-full h-full object-contain" />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -537,7 +703,7 @@ const RegisterThePetIFound = () => {
                 <DatePicker
                   selected={selectedDate}
                   onChange={handleDateChange}
-                  customInput={<CustomInput />}
+                  customInput={<CustomInput hasError={!!errors.mikorveszettel} />}
                   dateFormat="yyyy-MM-dd"
                   maxDate={new Date()}
                   className="w-full"

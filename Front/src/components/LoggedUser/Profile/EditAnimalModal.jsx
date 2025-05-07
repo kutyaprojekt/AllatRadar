@@ -1,14 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { FaTimes, FaImage, FaCalendarAlt } from 'react-icons/fa';
+import { FaTimes, FaImage, FaCalendarAlt, FaCheckCircle, FaExclamationCircle } from 'react-icons/fa';
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import "../../../styles/datepicker.css"; // Tailwind-alapú datepicker stílusok
-import UserContext from '../../../context/UserContext';
 
 const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
-    const { SetRefresh } = useContext(UserContext);
     const [formData, setFormData] = useState({
         allatfaj: animal.allatfaj || '',
         kategoria: animal.kategoria || '',
@@ -24,6 +22,19 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [newImage, setNewImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(animal.filePath ? `http://localhost:8000/${animal.filePath}` : (animal.kep ? `http://localhost:8000/images/${animal.kep}` : null));
+    
+    // Saját toast notification
+    const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+
+    // Notification megjelenítése, majd eltüntetése
+    useEffect(() => {
+        if (notification.show) {
+            const timer = setTimeout(() => {
+                setNotification({ ...notification, show: false });
+            }, 2500);
+            return () => clearTimeout(timer);
+        }
+    }, [notification]);
 
     // Dátum formázás
     const formatDate = (dateString) => {
@@ -88,14 +99,12 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
             const token = localStorage.getItem('usertoken');
             const formDataToSend = new FormData();
             
-            // Szöveges adatok hozzáadása
             Object.keys(formData).forEach(key => {
                 if (formData[key] !== null && formData[key] !== undefined) {
                     formDataToSend.append(key, formData[key]);
                 }
             });
             
-            // Új kép hozzáadása
             if (newImage) {
                 formDataToSend.append('kep', newImage);
             }
@@ -113,91 +122,96 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
             if (!response.ok) {
                 throw new Error(data.error || 'Hiba történt a poszt frissítése során');
             }
+            toast.success('Poszt sikeresen frissítve!', { theme: theme === "dark" ? "dark" : "light" });
             
-            // Sikerüzenet megjelenítése
-            toast.success(data.message || 'Poszt sikeresen frissítve!', {
-                position: "top-right",
-                autoClose: 2500,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: true
-            });
-            
-            // Modal bezárása
-            onClose();
-            
-            // Frissített adatok átadása
             if (typeof onUpdate === 'function') {
                 onUpdate(data.animal);
             }
             
-            // UserContext frissítése, hogy az alkalmazás minden része értesüljön a változásról
-            setTimeout(() => {
-                SetRefresh(prev => !prev);
-            }, 100);
-            
+            onClose();
         } catch (error) {
-            toast.error(error.message, {
-                position: "top-right",
-                autoClose: 2500,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: false,
-                draggable: true
+            // Hiba esetén saját értesítés
+            setNotification({
+                show: true,
+                message: error.message || 'Hiba történt a poszt frissítése során',
+                type: 'error'
             });
+        } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-            <ToastContainer 
-                position="top-right"
-                autoClose={2500}
-                hideProgressBar={false}
-                newestOnTop={true}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss={false}
-                pauseOnHover={false}
-                draggable
-                theme={theme === "dark" ? "dark" : "light"}
-                className="z-50"
-            />
-            <div className="flex items-center justify-center min-h-screen px-4 py-6">
-                <div 
-                    className="fixed inset-0 bg-black bg-opacity-40"
-                    onClick={onClose}
-                />
-                
-                <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl mx-auto p-0 z-50 overflow-hidden border border-gray-200 dark:border-gray-700 max-h-[90vh] flex flex-col">
-                    <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
-                        <h2 className="text-2xl font-bold text-[#1A73E8] dark:text-blue-300">Poszt szerkesztése</h2>
-                        <button 
-                            onClick={onClose} 
-                            className="text-gray-400 hover:text-gray-600 dark:hover:text-white p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
-                        >
-                            <FaTimes className="w-5 h-5" />
-                        </button>
+        <>
+            {/* Saját toast notification */}
+            {notification.show && (
+                <div className="fixed top-5 right-5 z-[9999] animate-fade-in">
+                    <div className={`px-4 py-3 rounded-lg shadow-lg flex items-center gap-3 ${
+                        notification.type === 'success' 
+                            ? 'bg-green-100 text-green-800 border-l-4 border-green-500' 
+                            : 'bg-red-100 text-red-800 border-l-4 border-red-500'
+                    }`}>
+                        {notification.type === 'success' ? (
+                            <FaCheckCircle className="text-green-500 text-xl" />
+                        ) : (
+                            <FaExclamationCircle className="text-red-500 text-xl" />
+                        )}
+                        <span className="font-medium">{notification.message}</span>
                     </div>
+                </div>
+            )}
 
-                    <div className="flex flex-col md:flex-row gap-6 px-8 py-6 bg-white dark:bg-gray-800 overflow-y-auto">
-                        <div className="md:w-2/5 w-full flex flex-col items-center">
-                            <div className="w-full h-72 rounded-2xl overflow-hidden shadow-lg border-2 border-blue-200 dark:border-blue-900 bg-gray-50 dark:bg-gray-900 flex items-center justify-center mb-4 relative group">
-                                {imagePreview ? (
-                                    <img 
-                                        src={imagePreview}
-                                        alt="Állat képe"
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <span className="text-3xl font-bold text-gray-400 dark:text-gray-600">KÉP</span>
-                                )}
-                                
-                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
-                                    <label className="cursor-pointer bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                                        <FaImage className="h-6 w-6 text-blue-500" />
+            <div className="fixed inset-0 z-50 overflow-y-auto">
+                <div className="flex items-center justify-center min-h-screen px-4 py-6">
+                    <div 
+                        className="fixed inset-0 bg-black bg-opacity-40"
+                        onClick={onClose}
+                    />
+                    
+                    <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl mx-auto p-0 z-50 overflow-hidden border border-gray-200 dark:border-gray-700 max-h-[90vh] flex flex-col">
+                        <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
+                            <h2 className="text-2xl font-bold text-[#1A73E8] dark:text-blue-300">Poszt szerkesztése</h2>
+                            <button 
+                                onClick={onClose} 
+                                className="text-gray-400 hover:text-gray-600 dark:hover:text-white p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
+                            >
+                                <FaTimes className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row gap-6 px-8 py-6 bg-white dark:bg-gray-800 overflow-y-auto">
+                            <div className="md:w-2/5 w-full flex flex-col items-center">
+                                <div className="w-full h-72 rounded-2xl overflow-hidden shadow-lg border-2 border-blue-200 dark:border-blue-900 bg-gray-50 dark:bg-gray-900 flex items-center justify-center mb-4 relative group">
+                                    {imagePreview ? (
+                                        <img 
+                                            src={imagePreview}
+                                            alt="Állat képe"
+                                            className="w-full h-full object-cover"
+                                        />
+                                    ) : (
+                                        <span className="text-3xl font-bold text-gray-400 dark:text-gray-600">KÉP</span>
+                                    )}
+                                    
+                                    <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-opacity flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                        <label className="cursor-pointer bg-white dark:bg-gray-800 rounded-full p-3 shadow-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                            <FaImage className="h-6 w-6 text-blue-500" />
+                                            <input 
+                                                type="file" 
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={handleImageChange}
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+                                <div className="flex flex-col items-center w-full">
+                                    <span className="inline-block px-4 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 shadow mb-2">#{animal?.id}</span>
+                                    <span className="text-lg font-bold text-[#073F48] dark:text-white mb-1">{formData.allatfaj}</span>
+                                    <span className="text-sm text-gray-500 dark:text-gray-400">{formData.kategoria}</span>
+                                    
+                                    <label className="mt-3 cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                                        <FaImage />
+                                        Kép módosítása
                                         <input 
                                             type="file" 
                                             accept="image/*"
@@ -205,152 +219,136 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                                             onChange={handleImageChange}
                                         />
                                     </label>
+                                    {newImage && (
+                                        <span className="mt-1 text-xs text-green-600 dark:text-green-400">
+                                            Új kép kiválasztva: {newImage.name}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
-                            <div className="flex flex-col items-center w-full">
-                                <span className="inline-block px-4 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 shadow mb-2">#{animal?.id}</span>
-                                <span className="text-lg font-bold text-[#073F48] dark:text-white mb-1">{formData.allatfaj}</span>
-                                <span className="text-sm text-gray-500 dark:text-gray-400">{formData.kategoria}</span>
-                                
-                                <label className="mt-3 cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-800/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-                                    <FaImage />
-                                    Kép módosítása
-                                    <input 
-                                        type="file" 
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleImageChange}
-                                    />
-                                </label>
-                                {newImage && (
-                                    <span className="mt-1 text-xs text-green-600 dark:text-green-400">
-                                        Új kép kiválasztva: {newImage.name}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                        
-                        <div className="md:w-3/5 w-full flex flex-col gap-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            
+                            <div className="md:w-3/5 w-full flex flex-col gap-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Állatfaj</label>
+                                        <input
+                                            type="text"
+                                            name="allatfaj"
+                                            value={formData.allatfaj}
+                                            onChange={handleInputChange}
+                                            className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Kategória</label>
+                                        <input
+                                            type="text"
+                                            name="kategoria"
+                                            value={formData.kategoria}
+                                            onChange={handleInputChange}
+                                            className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Neme</label>
+                                        <input
+                                            type="text"
+                                            name="neme"
+                                            value={formData.neme}
+                                            onChange={handleInputChange}
+                                            className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Szín</label>
+                                        <input
+                                            type="text"
+                                            name="szin"
+                                            value={formData.szin}
+                                            onChange={handleInputChange}
+                                            className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Méret</label>
+                                        <input
+                                            type="text"
+                                            name="meret"
+                                            value={formData.meret}
+                                            onChange={handleInputChange}
+                                            className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Helyszín</label>
+                                        <input
+                                            type="text"
+                                            name="helyszin"
+                                            value={formData.helyszin}
+                                            onChange={handleInputChange}
+                                            className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Chipszám</label>
+                                        <input
+                                            type="text"
+                                            name="chipszam"
+                                            value={formData.chipszam}
+                                            onChange={handleInputChange}
+                                            className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Dátum</label>
+                                        <DatePicker
+                                            selected={selectedDate}
+                                            onChange={handleDateChange}
+                                            customInput={<CustomInput />}
+                                            dateFormat="yyyy.MM.dd"
+                                            maxDate={new Date()}
+                                            required
+                                            showPopperArrow={false}
+                                            popperClassName="datepicker-popper-left"
+                                            popperPlacement="bottom-start"
+                                        />
+                                    </div>
+                                </div>
                                 <div>
-                                    <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Állatfaj</label>
-                                    <input
-                                        type="text"
-                                        name="allatfaj"
-                                        value={formData.allatfaj}
+                                    <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Egyéb információ</label>
+                                    <textarea
+                                        name="egyeb_info"
+                                        value={formData.egyeb_info}
                                         onChange={handleInputChange}
                                         className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
-                                        required
+                                        rows="3"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Kategória</label>
-                                    <input
-                                        type="text"
-                                        name="kategoria"
-                                        value={formData.kategoria}
-                                        onChange={handleInputChange}
-                                        className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Neme</label>
-                                    <input
-                                        type="text"
-                                        name="neme"
-                                        value={formData.neme}
-                                        onChange={handleInputChange}
-                                        className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Szín</label>
-                                    <input
-                                        type="text"
-                                        name="szin"
-                                        value={formData.szin}
-                                        onChange={handleInputChange}
-                                        className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Méret</label>
-                                    <input
-                                        type="text"
-                                        name="meret"
-                                        value={formData.meret}
-                                        onChange={handleInputChange}
-                                        className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Helyszín</label>
-                                    <input
-                                        type="text"
-                                        name="helyszin"
-                                        value={formData.helyszin}
-                                        onChange={handleInputChange}
-                                        className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Chipszám</label>
-                                    <input
-                                        type="text"
-                                        name="chipszam"
-                                        value={formData.chipszam}
-                                        onChange={handleInputChange}
-                                        className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Dátum</label>
-                                    <DatePicker
-                                        selected={selectedDate}
-                                        onChange={handleDateChange}
-                                        customInput={<CustomInput />}
-                                        dateFormat="yyyy.MM.dd"
-                                        maxDate={new Date()}
-                                        required
-                                        showPopperArrow={false}
-                                        popperClassName="datepicker-popper-left"
-                                        popperPlacement="bottom-start"
-                                    />
-                                </div>
-                            </div>
-                            <div>
-                                <label className="block text-sm font-semibold mb-1 text-gray-700 dark:text-gray-300">Egyéb információ</label>
-                                <textarea
-                                    name="egyeb_info"
-                                    value={formData.egyeb_info}
-                                    onChange={handleInputChange}
-                                    className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
-                                    rows="3"
-                                />
                             </div>
                         </div>
-                    </div>
 
-                    <div className="flex justify-end gap-3 px-8 py-6 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
-                        <button
-                            onClick={onClose}
-                            className="px-4 py-2 rounded-lg font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                        >
-                            Mégse
-                        </button>
-                        <button
-                            onClick={handleSubmit}
-                            disabled={isLoading}
-                            className={`px-4 py-2 rounded-lg font-semibold bg-[#1A73E8] hover:bg-[#1557B0] text-white shadow-md transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                            {isLoading ? 'Mentés...' : 'Mentés'}
-                        </button>
+                        <div className="flex justify-end gap-3 px-8 py-6 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
+                            <button
+                                onClick={onClose}
+                                className="px-4 py-2 rounded-lg font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                            >
+                                Mégse
+                            </button>
+                            <button
+                                onClick={handleSubmit}
+                                disabled={isLoading}
+                                className={`px-4 py-2 rounded-lg font-semibold bg-[#1A73E8] hover:bg-[#1557B0] text-white shadow-md transition ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {isLoading ? 'Mentés...' : 'Mentés'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

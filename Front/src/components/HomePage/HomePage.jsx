@@ -12,7 +12,7 @@ const Home = () => {
   const [selectedStory, setSelectedStory] = useState(null);
   const { theme } = useTheme();
 
-  // Szövegtrunkolás
+  // Szövegtrunkolási segédfüggvény
   const truncateText = (text, maxLength = 200) => {
     if (!text) return "Nincs leírás";
     return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
@@ -22,11 +22,13 @@ const Home = () => {
   const openFullStory = (story) => {
     setSelectedStory(story);
     setShowFullStoryModal(true);
+    document.body.style.overflow = 'hidden';
   };
 
   // Modal bezárása
   const closeFullStory = () => {
     setShowFullStoryModal(false);
+    document.body.style.overflow = 'auto';
   };
 
   // Intersection Observer hookok
@@ -51,15 +53,9 @@ const Home = () => {
         }
 
         const data = await response.json();
-        
-        // Dátum szerinti rendezés
-        const sortedAnimals = [...data].sort((a, b) => {
-          return new Date(b.datum) - new Date(a.datum);
-        });
-        
-        setLostAnimals(sortedAnimals);
+        setLostAnimals(data);
       } catch (error) {
-        // Hiba kezelése
+        console.error("Hiba történt az elveszett állatok lekérése során:", error);
       }
     };
 
@@ -84,7 +80,7 @@ const Home = () => {
         const data = await response.json();
         setHappyStories(data);
       } catch (error) {
-        // Hiba kezelése
+        console.error("Hiba történt a boldog történetek lekérése során:", error);
       }
     };
 
@@ -95,7 +91,7 @@ const Home = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Automatikus lapozás beállítása
+  // Automatikus lapozás beállítása a történeteknél
   useEffect(() => {
     if (happyStories.length === 0) return;
 
@@ -130,7 +126,7 @@ const Home = () => {
     setCurrentStoryIndex((prevIndex) => (prevIndex - 1 + happyStories.length) % happyStories.length);
   };
 
-  // Látható történetek indexeinek számítása
+  // Segédfüggvény a megjelenítendő történetek indexeinek kiszámításához
   const getVisibleStories = () => {
     if (happyStories.length === 0) return [];
     if (happyStories.length === 1) return [0];
@@ -142,7 +138,8 @@ const Home = () => {
   };
 
   return (
-    <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-[#073F48]"} min-h-screen pt-16 md:pt-0`}>
+    <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-[#073F48]"} min-h-screen pt-16 md:pt-0 no-scroll`}>
+      {/* Hero Section */}
       <div
         ref={heroRef}
         className={`${theme === "dark" ? "bg-gray-800" : "bg-gradient-to-r from-[#64B6FF] to-[#A7D8FF]"} text-white py-12 md:py-32 relative overflow-hidden transition-opacity duration-1000 ${heroInView ? "opacity-100" : "opacity-0"}`}
@@ -153,22 +150,15 @@ const Home = () => {
             Az "Állatkereső és -megtaláló Rendszer" segít az elveszett háziállatok gyors és hatékony visszakerülésében.
           </p>
           <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
-            <Link 
-              to={"/elveszettallat"} 
-              className={`${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-white hover:bg-gray-100 text-[#074F57]"} font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base inline-block text-center`}
-              style={{ width: "100%", maxWidth: "250px" }}
-            >
-              Elveszett Kisállatom
-            </Link>
-            <Link 
-              to={"/talaltallat"} 
-              className={`${theme === "dark" ? "bg-transparent border-2 border-gray-700 hover:bg-gray-700" : "bg-transparent border-2 border-white hover:bg-white hover:text-[#074F57]"} text-white font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base inline-block text-center`}
-              style={{ width: "100%", maxWidth: "250px" }}
-            >
-              Állatot találtam
-            </Link>
+            <button className={`${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-white hover:bg-gray-100 text-[#074F57]"} font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base`}>
+              <Link to={"/elveszettallat"}>Elveszett Kisállatom</Link>
+            </button>
+            <button className={`${theme === "dark" ? "bg-transparent border-2 border-gray-700 hover:bg-gray-700" : "bg-transparent border-2 border-white hover:bg-white hover:text-[#074F57]"} text-white font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base`}>
+              <Link to={"/talaltallat"}>Állatot találtam</Link>
+            </button>
           </div>
         </div>
+        {/* Háttérkép */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80"
@@ -178,6 +168,7 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Boldog Történetek (Megtalált állatok) */}
       <div
         ref={storiesRef}
         className={`${theme === "dark" ? "bg-gray-700 bg-opacity-95" : ""} py-8 md:py-20 transition-opacity duration-1000 ${storiesInView ? "opacity-100" : "opacity-0"}`}
@@ -189,6 +180,7 @@ const Home = () => {
           </p>
           
           <div className="relative flex justify-center items-center">
+            {/* Balra nyíl */}
             <button
               onClick={goToPreviousStory}
               className={`absolute left-[-20px] md:left-[-40px] top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-white hover:bg-gray-100"} p-2 md:p-3 rounded-full shadow-lg z-10 transition duration-300`}
@@ -198,6 +190,7 @@ const Home = () => {
               </svg>
             </button>
 
+            {/* Jobbra nyíl */}
             <button
               onClick={goToNextStory}
               className={`absolute right-[-20px] md:right-[-40px] top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-white hover:bg-gray-100"} p-2 md:p-3 rounded-full shadow-lg z-10 transition duration-300`}
@@ -207,7 +200,9 @@ const Home = () => {
               </svg>
             </button>
 
+            {/* Történet kártyák */}
             <div className="flex space-x-4 md:space-x-8 items-center w-full md:w-auto">
+              {/* Mobilnézet: 1 kép */}
               <div className="md:hidden w-full">
                 {happyStories.length > 0 ? (
                   <div className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} p-4 md:p-8 rounded-2xl shadow-xl`}>
@@ -238,6 +233,7 @@ const Home = () => {
                 )}
               </div>
 
+              {/* Gépi nézet: 3 kép */}
               <div className="hidden md:flex gap-10">
                 {happyStories.length > 0 ? (
                   getVisibleStories().map((index) => (
@@ -279,6 +275,7 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Elveszett Állatok */}
       <div
         ref={lostAnimalsRef}
         className={`${theme === "dark" ? "bg-gray-900" : "bg-[#F0EDEE]"} py-8 md:py-20 transition-opacity duration-1000 ${lostAnimalsInView ? "opacity-100" : "opacity-0"}`}
@@ -286,7 +283,7 @@ const Home = () => {
         <div className="container mx-auto px-4">
           <h2 className={`text-2xl md:text-4xl font-bold text-center ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-6 md:mb-12`}>Elveszett Állatok</h2>
           <p className={`text-center mb-10 max-w-3xl mx-auto ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
-            Ezek a legfrissebben feltöltött elveszett állatok
+            Ezek az állatok még keresik szerető otthonukat
           </p>
           
           <div className="flex flex-wrap justify-center gap-6">
@@ -322,6 +319,7 @@ const Home = () => {
         </div>
       </div>
 
+      {/* CTA (Call to Action) */}
       <div
         ref={ctaRef}
         className={`${theme === "dark" ? "bg-gray-700 bg-opacity-95" : ""} py-8 md:py-20 transition-opacity duration-1000 ${ctaInView ? "opacity-100" : "opacity-0"}`}
@@ -337,6 +335,7 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Teljes történet modal */}
       {showFullStoryModal && selectedStory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70" style={{ backdropFilter: 'blur(5px)' }}>
           <div className={`relative max-w-2xl w-full p-6 md:p-8 rounded-2xl shadow-2xl ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"} max-h-[90vh] overflow-y-auto`}>
