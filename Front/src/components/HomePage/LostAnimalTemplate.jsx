@@ -5,9 +5,11 @@ import { FaPaw, FaClock, FaMapMarkerAlt, FaInfoCircle } from 'react-icons/fa';
 
 const LostAnimalTemplate = ({ animal }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [scrollPosition, setScrollPosition] = useState(0);
     const { theme } = useTheme();
 
     const handleOpenModal = () => {
+        setScrollPosition(window.pageYOffset);
         setIsModalOpen(true);
         document.body.classList.add('modal-open');
     };
@@ -15,6 +17,11 @@ const LostAnimalTemplate = ({ animal }) => {
     const handleCloseModal = () => {
         setIsModalOpen(false);
         document.body.classList.remove('modal-open');
+        
+        // Időzítő használata, hogy a scrollozás a modal bezárása után történjen
+        setTimeout(() => {
+            window.scrollTo(0, scrollPosition);
+        }, 100);
     };
 
     useEffect(() => {

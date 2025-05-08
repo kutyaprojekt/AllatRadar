@@ -118,7 +118,8 @@ const Navbar = () => {
     setIsMenuOpen(false);
   };
 
-  const isLoggedIn = !!token;
+  // Check both token and user object
+  const isLoggedIn = !!token && !!user;
 
   // Alapértelmezett kép
   const defaultProfilePicture = "default-profile.jpg";

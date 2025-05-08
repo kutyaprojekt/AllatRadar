@@ -22,9 +22,32 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [newImage, setNewImage] = useState(null);
     const [imagePreview, setImagePreview] = useState(animal.filePath ? `http://localhost:8000/${animal.filePath}` : (animal.kep ? `http://localhost:8000/images/${animal.kep}` : null));
+    const [scrollPosition, setScrollPosition] = useState(0);
     
     // Saját toast notification
     const [notification, setNotification] = useState({ show: false, message: '', type: '' });
+
+    // Görgetési pozíció mentése a megnyitáskor
+    useEffect(() => {
+        setScrollPosition(window.pageYOffset);
+    }, []);
+
+    // Overflow kezelése a modal megjelenítésekor
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        document.body.classList.add('modal-open');
+        document.documentElement.style.overflow = 'hidden';
+        
+        return () => {
+            document.body.style.overflow = 'auto';
+            document.body.classList.remove('modal-open');
+            document.documentElement.style.overflow = '';
+            // Időzítő használata, hogy a scrollozás a modal bezárása után történjen
+            setTimeout(() => {
+                window.scrollTo(0, scrollPosition);
+            }, 100);
+        };
+    }, [scrollPosition]);
 
     // Notification megjelenítése, majd eltüntetése
     useEffect(() => {
@@ -141,6 +164,13 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
         }
     };
 
+    // Ez a handleClose függvény biztosítja, hogy a bezárási logika következetes legyen
+    const handleClose = () => {
+        if (typeof onClose === 'function') {
+            onClose();
+        }
+    };
+
     return (
         <>
             {/* Saját toast notification */}
@@ -165,14 +195,14 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                 <div className="flex items-center justify-center min-h-screen px-4 py-6">
                     <div 
                         className="fixed inset-0 bg-black bg-opacity-40"
-                        onClick={onClose}
+                        onClick={handleClose}
                     />
                     
                     <div className="relative bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-2xl mx-auto p-0 z-50 overflow-hidden border border-gray-200 dark:border-gray-700 max-h-[90vh] flex flex-col">
                         <div className="flex items-center justify-between px-8 py-6 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
                             <h2 className="text-2xl font-bold text-[#1A73E8] dark:text-blue-300">Poszt szerkesztése</h2>
                             <button 
-                                onClick={onClose} 
+                                onClick={handleClose} 
                                 className="text-gray-400 hover:text-gray-600 dark:hover:text-white p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                             >
                                 <FaTimes className="w-5 h-5" />
@@ -323,7 +353,7 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
                                         name="egyeb_info"
                                         value={formData.egyeb_info}
                                         onChange={handleInputChange}
-                                        className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300"
+                                        className="w-full p-2 border rounded-lg bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-300 resize-none h-[120px] min-h-[120px]"
                                         rows="3"
                                     />
                                 </div>
@@ -332,7 +362,7 @@ const EditAnimalModal = ({ animal, onClose, onUpdate, theme }) => {
 
                         <div className="flex justify-end gap-3 px-8 py-6 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#e3f0ff] to-[#f8fafc] dark:from-gray-900 dark:to-gray-800">
                             <button
-                                onClick={onClose}
+                                onClick={handleClose}
                                 className="px-4 py-2 rounded-lg font-medium bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition"
                             >
                                 Mégse

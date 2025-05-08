@@ -9,6 +9,7 @@ Modal.setAppElement('#root');
 
 const FoundAnimalsTemplate = ({ animal }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [scrollPosition, setScrollPosition] = useState(0);
     const { theme } = useTheme();
 
     const formatDate = (dateString) => {
@@ -38,6 +39,7 @@ const FoundAnimalsTemplate = ({ animal }) => {
     };
 
     const openModal = () => {
+        setScrollPosition(window.pageYOffset);
         setIsModalOpen(true);
         document.body.classList.add('modal-open');
     };
@@ -45,6 +47,10 @@ const FoundAnimalsTemplate = ({ animal }) => {
     const closeModal = () => {
         setIsModalOpen(false);
         document.body.classList.remove('modal-open');
+        
+        setTimeout(() => {
+            window.scrollTo(0, scrollPosition);
+        }, 100);
     };
 
     useEffect(() => {

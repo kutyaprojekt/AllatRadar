@@ -10,6 +10,7 @@ const Home = () => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [showFullStoryModal, setShowFullStoryModal] = useState(false);
   const [selectedStory, setSelectedStory] = useState(null);
+  const [scrollPosition, setScrollPosition] = useState(0);
   const { theme } = useTheme();
 
   // Szövegtrunkolási segédfüggvény
@@ -20,16 +21,38 @@ const Home = () => {
 
   // Teljes történet megjelenítése
   const openFullStory = (story) => {
+    setScrollPosition(window.pageYOffset);
     setSelectedStory(story);
     setShowFullStoryModal(true);
-    document.body.style.overflow = 'hidden';
   };
 
   // Modal bezárása
   const closeFullStory = () => {
     setShowFullStoryModal(false);
-    document.body.style.overflow = 'auto';
+    // Időzítő használata, hogy a scrollozás a modal bezárása után történjen
+    setTimeout(() => {
+      window.scrollTo(0, scrollPosition);
+    }, 100);
   };
+
+  // Overflow kezelése a modal megjelenítésekor
+  useEffect(() => {
+    if (showFullStoryModal) {
+      document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open');
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+      document.body.classList.remove('modal-open');
+      document.documentElement.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+      document.body.classList.remove('modal-open');
+      document.documentElement.style.overflow = '';
+    };
+  }, [showFullStoryModal]);
 
   // Intersection Observer hookok
   const { ref: heroRef, inView: heroInView } = useInView({ triggerOnce: true, threshold: 0.1 });
@@ -131,7 +154,7 @@ const Home = () => {
     if (happyStories.length === 0) return [];
     if (happyStories.length === 1) return [0];
     if (happyStories.length === 2) return [0, 1];
-    
+
     const prevIndex = (currentStoryIndex - 1 + happyStories.length) % happyStories.length;
     const nextIndex = (currentStoryIndex + 1) % happyStories.length;
     return [prevIndex, currentStoryIndex, nextIndex];
@@ -139,7 +162,6 @@ const Home = () => {
 
   return (
     <div className={`${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-[#073F48]"} min-h-screen pt-16 md:pt-0 no-scroll`}>
-      {/* Hero Section */}
       <div
         ref={heroRef}
         className={`${theme === "dark" ? "bg-gray-800" : "bg-gradient-to-r from-[#64B6FF] to-[#A7D8FF]"} text-white py-12 md:py-32 relative overflow-hidden transition-opacity duration-1000 ${heroInView ? "opacity-100" : "opacity-0"}`}
@@ -158,7 +180,6 @@ const Home = () => {
             </button>
           </div>
         </div>
-        {/* Háttérkép */}
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80"
@@ -168,7 +189,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Boldog Történetek (Megtalált állatok) */}
       <div
         ref={storiesRef}
         className={`${theme === "dark" ? "bg-gray-700 bg-opacity-95" : ""} py-8 md:py-20 transition-opacity duration-1000 ${storiesInView ? "opacity-100" : "opacity-0"}`}
@@ -178,9 +198,8 @@ const Home = () => {
           <p className={`text-center mb-10 max-w-3xl mx-auto ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
             Ezek az állatok már hazataláltak szerető gazdájukhoz
           </p>
-          
+
           <div className="relative flex justify-center items-center">
-            {/* Balra nyíl */}
             <button
               onClick={goToPreviousStory}
               className={`absolute left-[-20px] md:left-[-40px] top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-white hover:bg-gray-100"} p-2 md:p-3 rounded-full shadow-lg z-10 transition duration-300`}
@@ -190,7 +209,6 @@ const Home = () => {
               </svg>
             </button>
 
-            {/* Jobbra nyíl */}
             <button
               onClick={goToNextStory}
               className={`absolute right-[-20px] md:right-[-40px] top-1/2 transform -translate-y-1/2 ${theme === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-white hover:bg-gray-100"} p-2 md:p-3 rounded-full shadow-lg z-10 transition duration-300`}
@@ -200,29 +218,27 @@ const Home = () => {
               </svg>
             </button>
 
-            {/* Történet kártyák */}
             <div className="flex space-x-4 md:space-x-8 items-center w-full md:w-auto">
-              {/* Mobilnézet: 1 kép */}
               <div className="md:hidden w-full">
                 {happyStories.length > 0 ? (
-                  <div className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} p-4 md:p-8 rounded-2xl shadow-xl`}>
-                    <div className="relative h-32 md:h-60 mb-6 overflow-hidden rounded-lg">
+                  <div className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} p-4 rounded-2xl shadow-xl max-w-full`}>
+                    <div className="relative h-36 mb-4 overflow-hidden rounded-lg">
                       <img
                         src={happyStories[currentStoryIndex]?.filePath ? `http://localhost:8000/${happyStories[currentStoryIndex].filePath}` : "https://via.placeholder.com/400x300"}
                         alt={happyStories[currentStoryIndex]?.allatfaj}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <h3 className={`text-lg md:text-2xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-4`}>
+                    <h3 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-2`}>
                       {happyStories[currentStoryIndex]?.allatfaj || "Ismeretlen állat"}
                     </h3>
-                    <p className={`${theme === "dark" ? "text-gray-300" : "text-gray-600"} text-xs md:text-base mb-3`}>
-                      {truncateText(happyStories[currentStoryIndex]?.visszajelzes)}
+                    <p className={`${theme === "dark" ? "text-gray-300" : "text-gray-600"} text-sm mb-2 line-clamp-3`}>
+                      {truncateText(happyStories[currentStoryIndex]?.visszajelzes, 120)}
                     </p>
-                    {happyStories[currentStoryIndex]?.visszajelzes && happyStories[currentStoryIndex].visszajelzes.length > 200 && (
-                      <button 
+                    {happyStories[currentStoryIndex]?.visszajelzes && happyStories[currentStoryIndex].visszajelzes.length > 120 && (
+                      <button
                         onClick={() => openFullStory(happyStories[currentStoryIndex])}
-                        className={`mt-3 text-xs md:text-sm font-medium ${theme === "dark" ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"}`}
+                        className={`text-sm font-medium ${theme === "dark" ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"}`}
                       >
                         Teljes történet megtekintése
                       </button>
@@ -233,33 +249,31 @@ const Home = () => {
                 )}
               </div>
 
-              {/* Gépi nézet: 3 kép */}
-              <div className="hidden md:flex gap-10">
+              <div className="hidden md:flex gap-8">
                 {happyStories.length > 0 ? (
                   getVisibleStories().map((index) => (
                     <div
                       key={happyStories[index]?.id || index}
-                      className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} p-6 md:p-8 rounded-2xl shadow-xl transition-all duration-300 ${
-                        index === currentStoryIndex ? "scale-110 transform-origin-center z-20" : "scale-90 opacity-75 z-10"
-                      }`}
+                      className={`${theme === "dark" ? "bg-gray-800" : "bg-gray-100"} p-5 rounded-2xl shadow-xl transition-all duration-300 w-[380px] ${index === currentStoryIndex ? "scale-110 transform-origin-center z-20" : "scale-90 opacity-75 z-10"
+                        }`}
                     >
-                      <div className="relative h-48 md:h-60 mb-6 overflow-hidden rounded-2xl">
+                      <div className="relative h-48 mb-4 overflow-hidden rounded-xl">
                         <img
                           src={happyStories[index]?.filePath ? `http://localhost:8000/${happyStories[index].filePath}` : "https://via.placeholder.com/400x300"}
                           alt={happyStories[index]?.allatfaj || "Ismeretlen állat"}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h3 className={`text-xl md:text-2xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-4`}>
+                      <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-3`}>
                         {happyStories[index]?.allatfaj || "Ismeretlen állat"}
                       </h3>
-                      <p className={`${theme === "dark" ? "text-gray-300" : "text-gray-600"} text-sm md:text-base mb-3`}>
-                        {truncateText(happyStories[index]?.visszajelzes)}
+                      <p className={`${theme === "dark" ? "text-gray-300" : "text-gray-600"} text-sm mb-3 line-clamp-4`}>
+                        {truncateText(happyStories[index]?.visszajelzes, 160)}
                       </p>
-                      {happyStories[index]?.visszajelzes && happyStories[index].visszajelzes.length > 200 && (
-                        <button 
+                      {happyStories[index]?.visszajelzes && happyStories[index].visszajelzes.length > 160 && (
+                        <button
                           onClick={() => openFullStory(happyStories[index])}
-                          className={`mt-3 text-xs md:text-sm font-medium ${theme === "dark" ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"}`}
+                          className={`text-sm font-medium ${theme === "dark" ? "text-blue-400 hover:text-blue-300" : "text-blue-600 hover:text-blue-700"}`}
                         >
                           Teljes történet megtekintése
                         </button>
@@ -275,7 +289,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Elveszett Állatok */}
       <div
         ref={lostAnimalsRef}
         className={`${theme === "dark" ? "bg-gray-900" : "bg-[#F0EDEE]"} py-8 md:py-20 transition-opacity duration-1000 ${lostAnimalsInView ? "opacity-100" : "opacity-0"}`}
@@ -285,7 +298,7 @@ const Home = () => {
           <p className={`text-center mb-10 max-w-3xl mx-auto ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
             Ezek az állatok még keresik szerető otthonukat
           </p>
-          
+
           <div className="flex flex-wrap justify-center gap-6">
             {lostAnimals && lostAnimals.length > 0 ? (
               lostAnimals.slice(0, 6).map((animal) => (
@@ -307,7 +320,7 @@ const Home = () => {
               </div>
             )}
           </div>
-          
+
           <div className="text-center mt-12">
             <Link
               to="/osszallat"
@@ -319,7 +332,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* CTA (Call to Action) */}
       <div
         ref={ctaRef}
         className={`${theme === "dark" ? "bg-gray-700 bg-opacity-95" : ""} py-8 md:py-20 transition-opacity duration-1000 ${ctaInView ? "opacity-100" : "opacity-0"}`}
@@ -335,11 +347,10 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Teljes történet modal */}
       {showFullStoryModal && selectedStory && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70" style={{ backdropFilter: 'blur(5px)' }}>
           <div className={`relative max-w-2xl w-full p-6 md:p-8 rounded-2xl shadow-2xl ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-gray-900"} max-h-[90vh] overflow-y-auto`}>
-            <button 
+            <button
               onClick={closeFullStory}
               className="absolute top-3 right-3 p-1 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-800"
             >
@@ -347,7 +358,7 @@ const Home = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            
+
             <div>
               <h2 className="text-xl md:text-2xl font-bold mb-3">{selectedStory.allatfaj || "Ismeretlen állat"}</h2>
               <div className="prose max-w-none" style={{ whiteSpace: 'pre-line' }}>

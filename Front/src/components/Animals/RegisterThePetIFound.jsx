@@ -519,7 +519,7 @@ const RegisterThePetIFound = () => {
               errors.egyeb_infok ? "border-red-500" : theme === "dark" ? "border-gray-700" : "border-[#0c4a6e]"
             } ${theme === "dark" ? "bg-gray-700 text-white" : "bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${
               errors.egyeb_infok ? "focus:ring-red-500" : theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"
-            } text-base resize-none`}
+            } text-base resize-none h-[120px] min-h-[120px]`}
             placeholder="További információk..."
             rows="2"
           />
@@ -777,7 +777,7 @@ const RegisterThePetIFound = () => {
                   id="egyeb_infok"
                   value={formState.egyeb_infok}
                   onChange={writeData}
-                  className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base resize-none`}
+                  className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base resize-none h-[120px] min-h-[120px]`}
                   placeholder="További információk..."
                   rows="2"
                 />

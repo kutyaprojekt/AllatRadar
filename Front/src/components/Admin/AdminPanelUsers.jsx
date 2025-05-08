@@ -56,7 +56,7 @@ const AdminPanelUsers = () => {
     // Felhasználó törlése
     const handleDeleteUser = async (userId) => {
         try {
-            const response = await fetch(`http://localhost:8000/felhasznalok/${userId}`, {
+            const response = await fetch(`http://localhost:8000/felhasznalok/felhasznalok/${userId}`, {
                 method: 'DELETE',
                 headers: {
                     "Content-type": "application/json",
@@ -65,15 +65,16 @@ const AdminPanelUsers = () => {
             });
 
             if (response.ok) {
-                await response.json();
-                toast.success("Felhasználó törölve!");
-                loadAdatok();
+                toast.success("Felhasználó sikeresen törölve!");
+                loadAdatok(); // Frissítjük az adatokat a törlés után
+                closeDeleteModal();
             } else {
-                const errorText = await response.text();
-                toast.error("Hiba történt a törlés során: " + errorText);
+                const errorData = await response.json().catch(() => ({ error: "Ismeretlen hiba történt." }));
+                toast.error(`Hiba történt a törlés során: ${errorData.error || errorData.message || "Ismeretlen hiba"}`);
             }
         } catch (error) {
-            toast.error("Hiba történt a törlés során: " + error.message);
+            console.error("Törlési hiba:", error);
+            toast.error(`Hiba történt a törlés során: ${error.message || "Ismeretlen hiba"}`);
         }
     };
 

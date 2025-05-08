@@ -3,21 +3,32 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     const [refresh, SetRefresh] = useState(false);
-    const [user, setUser] = useState({});
+    const [user, setUser] = useState(null);
     const [hasRejectedPosts, setHasRejectedPosts] = useState(false);
     const token = localStorage.getItem('usertoken');
 
     // Felhasználó adatok lekérése
     const getCurrentUser = async (token) => {
-        const response = await fetch('http://localhost:8000/felhasznalok/me', {
-            method: 'GET',
-            headers: {
-                "Content-type": "application/json",
-                "Authorization": `Bearer ${token}`
+        try {
+            const response = await fetch('http://localhost:8000/felhasznalok/me', {
+                method: 'GET',
+                headers: {
+                    "Content-type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setUser(data);
+            } else {
+                // If token is invalid, clear it
+                localStorage.removeItem('usertoken');
+                setUser(null);
             }
-        });
-        const data = await response.json();
-        setUser(data);
+        } catch (error) {
+            localStorage.removeItem('usertoken');
+            setUser(null);
+        }
     };
 
     // Elutasított posztok ellenőrzése
@@ -34,6 +45,7 @@ export const UserProvider = ({ children }) => {
             setHasRejectedPosts(data.length > 0);
         } catch (error) {
             // Hiba az elutasított posztok ellenőrzése során
+            setHasRejectedPosts(false);
         }
     };
 
@@ -42,6 +54,8 @@ export const UserProvider = ({ children }) => {
         if (token) {
             getCurrentUser(token);
             checkRejectedPosts();
+        } else {
+            setUser(null);
         }
     }, [refresh]);
 

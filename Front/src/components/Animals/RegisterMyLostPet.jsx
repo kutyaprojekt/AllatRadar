@@ -35,6 +35,9 @@ const RegisterMyLostPet = () => {
   const [file, setFile] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  // Modal nyitásakor/bezárásakor az overflow kezelése
+  const [showModal, setShowModal] = useState(false);
+
   useEffect(() => {
     window.scrollTo(0, 0);
     document.body.className = theme === "dark" ? "bg-gray-900 text-white dark" : "bg-gradient-to-b from-[#f0fdff] to-[#e0e3fe] text-[#073F48]";
@@ -49,6 +52,25 @@ const RegisterMyLostPet = () => {
       window.removeEventListener('resize', checkIfMobile);
     };
   }, [theme]);
+
+  // Modal nyitásakor/bezárásakor az overflow kezelése
+  useEffect(() => {
+    if (showModal) {
+      document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open');
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+      document.body.classList.remove('modal-open');
+      document.documentElement.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = 'auto';
+      document.body.classList.remove('modal-open');
+      document.documentElement.style.overflow = '';
+    };
+  }, [showModal]);
 
   const writeData = (e) => {
     const { id, value } = e.target;
@@ -358,7 +380,7 @@ const RegisterMyLostPet = () => {
           <textarea
             id="egyeb_infok"
             value={formState.egyeb_infok}
-            className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base resize-none`}
+            className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base resize-none h-[120px] min-h-[120px]`}
             placeholder="További információk..."
             onChange={writeData}
             rows={2}
@@ -477,7 +499,7 @@ const RegisterMyLostPet = () => {
                   <textarea
                     id="egyeb_infok"
                     value={formState.egyeb_infok}
-                    className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base resize-none`}
+                    className={`w-full pl-10 pr-3 py-2 border-2 ${theme === "dark" ? "border-gray-700 bg-gray-700 text-white" : "border-[#0c4a6e] bg-white text-[#073F48]"} rounded-lg focus:outline-none focus:ring-2 ${theme === "dark" ? "focus:ring-gray-500" : "focus:ring-[#0c4a6e]"} text-base resize-none h-[120px] min-h-[120px]`}
                     placeholder="További információk..."
                     onChange={writeData}
                     rows={2}
