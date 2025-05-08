@@ -7,7 +7,7 @@ import ConfirmationModal from './ComfirmationModal'; // Megerősítés modal
 import EditAnimalModal from './EditAnimalModal'; // Szerkesztő modal
 import UserContext from '../../../context/UserContext';
 
-const UserPostsTemplate = ({animal, onUpdate}) => {
+const UserPostsTemplate = ({ animal, onUpdate }) => {
     const { theme } = useTheme();
     const { SetRefresh } = useContext(UserContext);
     const [isLoading, setIsLoading] = useState(false);
@@ -29,7 +29,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
             });
 
             const data = await response.json();
-            
+
             if (!response.ok) {
                 throw new Error(data.error || "Hiba történt a frissítés során");
             }
@@ -37,7 +37,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
             // Modal bezárása
             setShowConfirmation(false);
             setIsLoading(false);
-            
+
             // Sikeres értesítés
             toast.success("Állat sikeresen megjelölve megtaláltként!", {
                 position: "top-right",
@@ -48,7 +48,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                 draggable: true,
                 theme: theme === "dark" ? "dark" : "light"
             });
-            
+
             // Adatok frissítése
             if (onUpdate) {
                 onUpdate();
@@ -79,7 +79,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
     const handleEditComplete = (updatedAnimal) => {
         // Modal bezárása
         setShowEditModal(false);
-        
+
         // Adatok frissítése
         if (typeof onUpdate === 'function') {
             onUpdate(updatedAnimal);
@@ -88,7 +88,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
 
     return (
         <>
-            <ToastContainer 
+            <ToastContainer
                 position="top-right"
                 autoClose={2500}
                 hideProgressBar={false}
@@ -105,12 +105,13 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                 {/* Kép rész */}
                 <div className="h-48 w-full overflow-hidden relative">
                     {animal.filePath ? (
-                        <img 
-                            src={`http://localhost:8000/${animal.filePath}`} 
-                            alt={animal.allatfaj} 
-                            className="w-full h-full object-cover"
+                        <img
+                            src={`http://localhost:8000/${animal.filePath}`}
+                            alt={animal.allatfaj}
+                            className="w-full h-full object-cover object-[center_top]"
+                            style={{ objectPosition: "center 30%" }}
                             onError={(e) => {
-                                e.target.onerror = null; 
+                                e.target.onerror = null;
                                 e.target.src = '';
                             }}
                         />
@@ -120,7 +121,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                         </div>
                     )}
                 </div>
-                
+
                 {/* Tartalom rész */}
                 <div className="flex-grow p-6 flex flex-col">
                     <div className="flex justify-between items-start mb-4">
@@ -128,17 +129,16 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                             <h2 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"}`}>{animal.allatfaj}</h2>
                             <p className={`text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>{animal.kategoria}</p>
                         </div>
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                            animal.visszakerult_e === "true" 
-                                ? "bg-green-100 text-green-800" 
-                                : animal.elutasitva === "" 
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${animal.visszakerult_e === "true"
+                                ? "bg-green-100 text-green-800"
+                                : animal.elutasitva === ""
                                     ? "bg-yellow-100 text-yellow-800"
                                     : animal.elutasitva === "true"
                                         ? "bg-red-100 text-red-800"
                                         : "bg-blue-100 text-blue-800"
-                        }`}>
-                            {animal.visszakerult_e === "true" 
-                                ? "Megtalálva" 
+                            }`}>
+                            {animal.visszakerult_e === "true"
+                                ? "Megtalálva"
                                 : animal.elutasitva === ""
                                     ? "Jóváhagyásra vár"
                                     : animal.elutasitva === "true"
@@ -151,7 +151,7 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                         <div className={`grid grid-cols-2 gap-3 mb-4 text-sm ${theme === "dark" ? "text-gray-300" : "text-gray-600"}`}>
                             <div>
                                 <p><strong>Dátum:</strong> {animal.elveszesIdeje}</p>
-                                <p><strong>Nem:</strong> {animal.neme}</p>  
+                                <p><strong>Nem:</strong> {animal.neme}</p>
                             </div>
                             <div>
                                 <p><strong>Szín:</strong> {animal.szin}</p>
@@ -170,26 +170,24 @@ const UserPostsTemplate = ({animal, onUpdate}) => {
                     {/* Funkciógombok */}
                     <div className="flex flex-col gap-2 mt-4">
                         {animal.visszakerult_e !== "true" && (
-                            <button 
+                            <button
                                 onClick={handleConfirm}
                                 disabled={isLoading}
-                                className={`w-full py-2 px-4 rounded-lg font-medium ${
-                                    theme === "dark" 
-                                        ? "bg-green-600 hover:bg-green-700 text-white" 
+                                className={`w-full py-2 px-4 rounded-lg font-medium ${theme === "dark"
+                                        ? "bg-green-600 hover:bg-green-700 text-white"
                                         : "bg-green-500 hover:bg-green-600 text-white"
-                                } transition duration-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    } transition duration-300 ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {isLoading ? 'Feldolgozás...' : 'Megjelölés megtaláltként'}
                             </button>
                         )}
                         {animal.visszakerult_e !== "true" && (
-                            <button 
+                            <button
                                 onClick={handleEdit}
-                                className={`w-full py-2 px-4 rounded-lg font-medium ${
-                                    theme === "dark" 
-                                        ? "bg-blue-600 hover:bg-blue-700 text-white" 
+                                className={`w-full py-2 px-4 rounded-lg font-medium ${theme === "dark"
+                                        ? "bg-blue-600 hover:bg-blue-700 text-white"
                                         : "bg-blue-500 hover:bg-blue-600 text-white"
-                                } transition duration-300`}
+                                    } transition duration-300`}
                             >
                                 Szerkesztés
                             </button>

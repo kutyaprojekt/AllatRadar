@@ -172,12 +172,18 @@ const Home = () => {
             Az "Állatkereső és -megtaláló Rendszer" segít az elveszett háziállatok gyors és hatékony visszakerülésében.
           </p>
           <div className="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
-            <button className={`${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-white hover:bg-gray-100 text-[#074F57]"} font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base`}>
-              <Link to={"/elveszettallat"}>Elveszett Kisállatom</Link>
-            </button>
-            <button className={`${theme === "dark" ? "bg-transparent border-2 border-gray-700 hover:bg-gray-700" : "bg-transparent border-2 border-white hover:bg-white hover:text-[#074F57]"} text-white font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base`}>
-              <Link to={"/talaltallat"}>Állatot találtam</Link>
-            </button>
+            <Link
+              to={"/elveszettallat"}
+              className={`${theme === "dark" ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-white hover:bg-gray-100 text-[#074F57]"} font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base`}
+            >
+              Elveszett Kisállatom
+            </Link>
+            <Link
+              to={"/talaltallat"}
+              className={`${theme === "dark" ? "bg-transparent border-2 border-gray-700 hover:bg-gray-700 text-white" : "bg-transparent border-2 border-white hover:bg-white hover:text-[#074F57] text-white"} font-semibold py-2 px-4 md:py-3 md:px-8 rounded-full transition duration-300 shadow-lg text-sm md:text-base`}
+            >
+              Állatot találtam
+            </Link>
           </div>
         </div>
         <div className="absolute inset-0 z-0">
@@ -227,6 +233,7 @@ const Home = () => {
                         src={happyStories[currentStoryIndex]?.filePath ? `http://localhost:8000/${happyStories[currentStoryIndex].filePath}` : "https://via.placeholder.com/400x300"}
                         alt={happyStories[currentStoryIndex]?.allatfaj}
                         className="w-full h-full object-cover"
+                        style={{ objectPosition: "center 20%" }}
                       />
                     </div>
                     <h3 className={`text-lg font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-2`}>
@@ -262,6 +269,7 @@ const Home = () => {
                           src={happyStories[index]?.filePath ? `http://localhost:8000/${happyStories[index].filePath}` : "https://via.placeholder.com/400x300"}
                           alt={happyStories[index]?.allatfaj || "Ismeretlen állat"}
                           className="w-full h-full object-cover"
+                          style={{ objectPosition: "center 20%" }}
                         />
                       </div>
                       <h3 className={`text-xl font-bold ${theme === "dark" ? "text-white" : "text-[#073F48]"} mb-3`}>

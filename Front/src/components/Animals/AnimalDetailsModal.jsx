@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from "../../context/ThemeContext";
 import Modal from 'react-modal';
 import { FaTimes, FaPaw, FaCalendarAlt, FaMapMarkerAlt, FaInfoCircle, FaVenusMars, FaRuler, FaUser, FaEnvelope, FaPhone, FaCheck, FaTimes as FaTimesIcon } from "react-icons/fa";
@@ -11,6 +11,7 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
     const cardBg = theme === "dark" ? "bg-gray-800" : "bg-gray-100";
     const textSecondary = theme === "dark" ? "text-gray-400" : "text-gray-600";
     const borderColor = theme === "dark" ? "border-gray-700" : "border-gray-300";
+    const [scrollPosition, setScrollPosition] = useState(0);
 
     // ISO dátum átalakítása olvasható formátumra
     const formatDate = (dateString) => {
@@ -28,12 +29,23 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
         }
     };
 
+    // Görgetési pozíció mentése a modal megnyitásakor
+    useEffect(() => {
+        if (isOpen) {
+            setScrollPosition(window.pageYOffset);
+        }
+    }, [isOpen]);
+
     const handleAfterOpen = () => {
         document.body.classList.add('modal-open');
     };
 
     const handleAfterClose = () => {
         document.body.classList.remove('modal-open');
+        // Visszagörgetés a modal bezárása után
+        setTimeout(() => {
+            window.scrollTo(0, scrollPosition);
+        }, 100);
     };
 
     useEffect(() => {
@@ -42,14 +54,21 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
         };
     }, []);
 
+    // Ez a handleClose függvény biztosítja, hogy a bezárási logika következetes legyen
+    const handleClose = () => {
+        if (typeof onClose === 'function') {
+            onClose();
+        }
+    };
+
     return (
         <Modal
             isOpen={isOpen}
-            onRequestClose={onClose}
+            onRequestClose={handleClose}
             onAfterOpen={handleAfterOpen}
             onAfterClose={handleAfterClose}
             contentLabel="Állat részletes adatai"
-            className={`${bgColor} rounded-xl p-8 w-11/12 max-w-4xl mx-auto relative shadow-2xl border ${borderColor}`}
+            className={`${bgColor} rounded-xl p-8 w-11/12 max-w-4xl mx-auto relative shadow-2xl border ${borderColor} max-h-[90vh] overflow-y-auto`}
             overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 pt-16"
             style={{
                 overlay: {
@@ -64,7 +83,7 @@ const AnimalDetailsModal = ({ isOpen, onClose, animal }) => {
             }}
         >
             <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="absolute top-4 right-4 p-2 rounded-full bg-red-600 hover:bg-red-700 text-white shadow-md"
             >
                 <FaTimes className="text-lg" />

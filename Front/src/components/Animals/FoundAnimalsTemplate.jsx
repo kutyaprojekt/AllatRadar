@@ -26,7 +26,7 @@ const FoundAnimalsTemplate = ({ animal }) => {
         try {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return "Érvénytelen dátum";
-            
+
             return formatDate(dateString);
         } catch (error) {
             return "Érvénytelen dátum";
@@ -47,7 +47,7 @@ const FoundAnimalsTemplate = ({ animal }) => {
     const closeModal = () => {
         setIsModalOpen(false);
         document.body.classList.remove('modal-open');
-        
+
         setTimeout(() => {
             window.scrollTo(0, scrollPosition);
         }, 100);
@@ -60,16 +60,17 @@ const FoundAnimalsTemplate = ({ animal }) => {
     }, []);
 
     return (
-        <div className={`${theme === "dark" 
-            ? "bg-gray-800 border-gray-700 border-2 shadow-xl shadow-gray-900/40" 
+        <div className={`${theme === "dark"
+            ? "bg-gray-800 border-gray-700 border-2 shadow-xl shadow-gray-900/40"
             : "bg-white border border-gray-200"
-        } rounded-xl overflow-hidden w-[350px] mx-auto flex flex-col h-full`}>
+            } rounded-xl overflow-hidden w-[350px] mx-auto flex flex-col h-full`}>
             <div className="w-full h-64 overflow-hidden relative">
                 {animal.filePath ? (
                     <img
                         src={`http://localhost:8000/${animal.filePath}`}
                         alt={animal.allatfaj || "Állat"}
                         className="w-full h-full object-cover"
+                        style={{ objectPosition: "center 30%" }}
                         onError={(e) => {
                             e.target.src = "https://via.placeholder.com/400x300";
                         }}
@@ -79,20 +80,18 @@ const FoundAnimalsTemplate = ({ animal }) => {
                         <FaPaw className="w-16 h-16 text-gray-400" />
                     </div>
                 )}
-                <div className={`absolute top-0 right-0 mt-3 mr-3 px-2 py-1 rounded-full text-xs font-semibold ${
-                    theme === "dark" 
-                        ? "bg-green-800 text-white" 
+                <div className={`absolute top-0 right-0 mt-3 mr-3 px-2 py-1 rounded-full text-xs font-semibold ${theme === "dark"
+                        ? "bg-green-800 text-white"
                         : "bg-green-100 text-green-800"
-                }`}>
+                    }`}>
                     Megtalálva
                 </div>
             </div>
-            
+
             <div className="p-5 flex flex-col flex-grow">
                 <div className="flex items-center mb-3">
-                    <h2 className={`text-xl font-bold flex items-center gap-2 ${
-                        theme === "dark" ? "text-white" : "text-gray-800"
-                    }`}>
+                    <h2 className={`text-xl font-bold flex items-center gap-2 ${theme === "dark" ? "text-white" : "text-gray-800"
+                        }`}>
                         <FaPaw className="text-yellow-500" />
                         {animal.allatfaj || "Ismeretlen faj"}
                     </h2>
@@ -114,14 +113,12 @@ const FoundAnimalsTemplate = ({ animal }) => {
                 </div>
 
                 <div className="mb-4">
-                    <div className={`${
-                        theme === "dark" 
-                            ? "bg-gray-900 border border-gray-700" 
+                    <div className={`${theme === "dark"
+                            ? "bg-gray-900 border border-gray-700"
                             : "bg-gray-50"
-                    } p-3 rounded-lg`}>
-                        <h3 className={`font-semibold flex items-center gap-2 mb-2 ${
-                            theme === "dark" ? "text-gray-100" : "text-gray-700"
-                        }`}>
+                        } p-3 rounded-lg`}>
+                        <h3 className={`font-semibold flex items-center gap-2 mb-2 ${theme === "dark" ? "text-gray-100" : "text-gray-700"
+                            }`}>
                             <FaInfoCircle className="text-yellow-500" />
                             Visszajelzés:
                         </h3>
@@ -129,7 +126,7 @@ const FoundAnimalsTemplate = ({ animal }) => {
                             {truncateText(animal.visszajelzes, 100)}
                         </p>
                         {animal.visszajelzes && animal.visszajelzes.length > 100 && (
-                            <button 
+                            <button
                                 onClick={openModal}
                                 className={`mt-2 text-xs font-medium ${theme === "dark" ? "text-green-400 hover:text-green-300" : "text-green-600 hover:text-green-700"}`}
                             >
@@ -160,7 +157,7 @@ const FoundAnimalsTemplate = ({ animal }) => {
                     }
                 }}
             >
-                <button 
+                <button
                     onClick={closeModal}
                     className="absolute top-3 right-3 p-1 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-800"
                 >
@@ -168,7 +165,7 @@ const FoundAnimalsTemplate = ({ animal }) => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
-                
+
                 <div>
                     <h2 className="text-xl md:text-2xl font-bold mb-3">{animal.allatfaj || "Ismeretlen állat"} sikertörténete</h2>
                     <div className="flex flex-col md:flex-row gap-6 mb-4">

@@ -241,15 +241,6 @@ const RegisterThePetIFound = () => {
     // Beállítjuk a küldés állapotot
     setIsSubmitting(true);
 
-    toast.info("Adatok feltöltése folyamatban...", {
-      position: "top-right",
-      autoClose: 2500,
-      hideProgressBar: false,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true
-    });
-
     const formData = new FormData();
     // Űrlap adatok hozzáadása
     for (const key in formState) {

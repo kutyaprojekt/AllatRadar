@@ -11,22 +11,24 @@ const LostAnimalTemplate = ({ animal }) => {
     const handleOpenModal = () => {
         setScrollPosition(window.pageYOffset);
         setIsModalOpen(true);
-        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
-        document.body.classList.remove('modal-open');
+        document.body.style.overflow = 'auto';
         
-        // Időzítő használata, hogy a scrollozás a modal bezárása után történjen
-        setTimeout(() => {
-            window.scrollTo(0, scrollPosition);
-        }, 100);
+        requestAnimationFrame(() => {
+            window.scrollTo({
+                top: scrollPosition,
+                behavior: 'instant'
+            });
+        });
     };
 
     useEffect(() => {
         return () => {
-            document.body.classList.remove('modal-open');
+            document.body.style.overflow = 'auto';
         };
     }, []);
 
@@ -37,7 +39,6 @@ const LostAnimalTemplate = ({ animal }) => {
             const date = new Date(dateString);
             if (isNaN(date.getTime())) return "Érvénytelen dátum";
 
-            // Dátum formázás YYYY.MM.DD formátumban
             const year = date.getFullYear();
             const month = date.getMonth() + 1;
             const day = date.getDate();
@@ -139,6 +140,7 @@ const LostAnimalTemplate = ({ animal }) => {
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 animal={animal}
+                scrollPosition={scrollPosition}
             />
         </div>
     );
