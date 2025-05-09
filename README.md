@@ -9,12 +9,11 @@ Az AllatRadar egy olyan webalkalmazás, amely segít az állattulajdonosoknak me
 
 - 🔐 Felhasználói regisztráció és bejelentkezés
 - 🐶 Elveszett vagy talált állatok regisztrálása részletes adatokkal
-- 🗺️ Térképes megjelenítés a helyszín könnyebb azonosításához
 - 🔍 Keresési és szűrési lehetőségek
-- 💬 Üzenetküldési rendszer a felhasználók között
+- 💬 Értesítési rendszer
 - 👤 Felhasználói profil kezelés
 - 📱 Reszponzív dizájn (mobil, tablet és asztali eszközökre)
-- 👑 Admin funkciók a hirdetések és felhasználók kezeléséhez
+- 👑 Admin funkciók a bejegyzések és felhasználók kezeléséhez
 
 ## 🛠️ Technológiák
 
