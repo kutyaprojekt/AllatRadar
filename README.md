@@ -2,8 +2,7 @@
 
 ## 📖 Projektről
 
-Az AllatRadar egy olyan webalkalmazás, amely segít az állattulajdonosoknak megtalálni elveszett kisállataikat és jelenteni a talált állatokat. A platform lehetővé teszi a felhasználók számára a regisztrációt, elveszett vagy talált állat hirdetések létrehozását, és a kommunikációt másokkal, hogy újraegyesíthessék a kisállatokat gazdáikkal.
-
+Az AllatRadar egy olyan webalkalmazás, amely segít az állattulajdonosoknak megtalálni elveszett kisállataikat és jelenteni a talált állatokat. A platform lehetővé teszi a felhasználók számára a regisztrációt, elveszett vagy talált állat hirdetések létrehozását, és a kapcsolatfelvételt másokkal, hogy újraegyesíthessék a kisállatokat gazdáikkal.
 
 ## ✨ Funkciók
 
@@ -29,7 +28,6 @@ Az AllatRadar egy olyan webalkalmazás, amely segít az állattulajdonosoknak me
 - **Vite** - Fejlesztői eszköz
 - **React Router** - Kliens oldali routing
 - **Tailwind CSS** - Stíluskezelés
-- **Leaflet** - Térképes integrációhoz
 - **Axios** - HTTP kérések
 - **React Toastify** - Felhasználói értesítések
 
@@ -37,34 +35,29 @@ Az AllatRadar egy olyan webalkalmazás, amely segít az állattulajdonosoknak me
 
 ### Előfeltételek
 - Node.js (v16 vagy magasabb)
-- npm vagy yarn
+- npm
 
 ### Telepítés
 
 1. Klónozd a repository-t
-```bash
-git clone https://github.com/yourusername/AllatRadar.git
+
+git clone https://github.com/kutyaprojekt/AllatRadar.git
 cd AllatRadar
-```
 
 ### Backend beállítása
 
-```bash
 cd Back
 npm install
 npx prisma generate
 npm start
-```
 
 A backend a http://localhost:8000 címen fog futni.
 
 ### Frontend beállítása
 
-```bash
 cd Front
 npm install
 npm run dev
-```
 
 A frontend a http://localhost:5173 címen fog futni.
 
@@ -90,16 +83,5 @@ További API végpontok a kódban találhatók.
 
 ### Frissítések telepítése
 
-```bash
 cd Back && npm update
 cd ../Front && npm update
-```
-
-## 📝 Közreműködés
-
-1. Fork-old a repository-t
-2. Hozz létre egy feature branch-et (`git checkout -b feature/amazing-feature`)
-3. Commit-old a változtatásaidat (`git commit -m 'Add some amazing feature'`)
-4. Push-old a branch-et (`git push origin feature/amazing-feature`)
-5. Nyiss egy Pull Request-et
-
