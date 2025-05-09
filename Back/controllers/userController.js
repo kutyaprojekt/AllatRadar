@@ -40,19 +40,22 @@ const deleteUser = async (req, res) => {
     try {
         const user = await prisma.user.findUnique({
             where: { id: userId },
+            include: { animals: true } // Include related animals
         });
 
         if (!user) {
             return res.status(404).json({ error: "Felhasználó nem található!" });
         }
-
+        
+        // Delete the user (with cascade delete handling related records)
         await prisma.user.delete({
             where: { id: userId },
         });
 
         res.json({ message: "Felhasználó sikeresen törölve!" });
     } catch (error) {
-        res.status(500).json({ error: "Hiba történt a felhasználó törlése során" });
+        console.error("Deletion error:", error);
+        res.status(500).json({ error: "Hiba történt a felhasználó törlése során", details: error.message });
     }
 };
 
