@@ -41,7 +41,7 @@ Az AllatRadar egy olyan webalkalmazás, amely segít az állattulajdonosoknak me
 
 1. Klónozd a repository-t
 ```bash
-git clone https://github.com/yourusername/AllatRadar.git
+git clone https://github.com/kutyaprojekt/AllatRadar.git
 cd AllatRadar
 ```
 
