@@ -72,7 +72,7 @@ Az alkalmazás SQLite adatbázist használ a következő fő entitásokkal:
 
 - **User** - Felhasználói adatok
 - **Animal** - Állat hirdetések adatai
-- **Message** - Felhasználók közötti üzenetek
+- **Message** - Értesítések
 
 ## 👩‍💻 Fejlesztési útmutató
 
