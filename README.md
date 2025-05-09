@@ -40,24 +40,29 @@ Az AllatRadar egy olyan webalkalmazás, amely segít az állattulajdonosoknak me
 ### Telepítés
 
 1. Klónozd a repository-t
-
-git clone https://github.com/kutyaprojekt/AllatRadar.git
+```bash
+git clone https://github.com/yourusername/AllatRadar.git
 cd AllatRadar
+```
 
 ### Backend beállítása
 
+```bash
 cd Back
 npm install
 npx prisma generate
 npm start
+```
 
 A backend a http://localhost:8000 címen fog futni.
 
 ### Frontend beállítása
 
+```bash
 cd Front
 npm install
 npm run dev
+```
 
 A frontend a http://localhost:5173 címen fog futni.
 
@@ -83,5 +88,7 @@ További API végpontok a kódban találhatók.
 
 ### Frissítések telepítése
 
+```bash
 cd Back && npm update
 cd ../Front && npm update
+```
